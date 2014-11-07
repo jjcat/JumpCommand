@@ -22,19 +22,18 @@ JumpCommand can only register static function and class function that inherited 
 
 Here is a example:
 
-```
+```csharp
 [JumpCommandAttribute["test","output integer"]]
 static public void CommandTest(int i) {
     Debug.Log(i.ToString());
 }
-
 ```
 
 We have registered a command named `test` with help text "output integer", build-in command `ls` can list all commands and help text. Now input `test 10` as a command we can get a output message `10` in Console.
 
 If you want to change a person's speed from command like `speed 0.5`, add JumpCommandAttribute to AdjustSpeed, and make sure when you input the command you have selected the GameObject you want to invoke.
 
-```
+```csharp
 //Person.cs
 public class Person :  MonoBehaviour {
     //...
@@ -44,7 +43,6 @@ public class Person :  MonoBehaviour {
 	}
 	//...
 }
-
 ```
 
 If the function is static, just add JumpCommandAttribute and call it.
