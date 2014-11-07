@@ -18,6 +18,7 @@ static public class JumpCommand {
     }
 
     static private void RegisterAllCommandObjects() {
+#if UNITY_EDITOR
         mCmdLst.Clear();
         var csharpDLL = Assembly.GetExecutingAssembly();  // unity csharp.dll assembly
         foreach( var t in csharpDLL.GetTypes() ) {        
@@ -37,6 +38,7 @@ static public class JumpCommand {
                 }
             }
         }
+#endif
     }
 
     static public bool Constains(string commandName) {
