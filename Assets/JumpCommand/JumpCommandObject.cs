@@ -21,6 +21,16 @@ public class JumpCommandObject  {
         Help    = help;
     }
 
+    [JumpCommandAttribute["speed","Change person speed"]]
+    public void SpeedAjust(float value) {
+        speed += value;
+    }
+
+    [JumpCommandAttribute["test","test command"]]
+    static public CommandTest(int i) {
+        Debug.Log(i.ToString());
+    }
+
     public bool Call(string[] paramStr, Object callee = null) {        
         // create parameter list
         ParameterInfo[] paramInfoLst = Method.GetParameters();
