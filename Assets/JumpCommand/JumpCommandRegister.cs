@@ -1,10 +1,10 @@
 ﻿using System;
 
-public class JumpCommandAttribute : Attribute {
+public class JumpCommandRegister : Attribute {
 	public string mCommand;
 	public string mHelp;
 
-	public JumpCommandAttribute(string command, string help = "") {
+	public JumpCommandRegister(string command, string help = "") {
 		mCommand  = command;
 		mHelp     = help;
 	}

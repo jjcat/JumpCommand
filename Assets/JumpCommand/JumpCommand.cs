@@ -24,9 +24,9 @@ static public class JumpCommand {
         foreach( var t in csharpDLL.GetTypes() ) {        
             foreach(var m in t.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)) {  
                 foreach(var a in m.GetCustomAttributes(true)) {
-                    if(a.GetType() == typeof(JumpCommandAttribute) ) {
-                        string commandName = (a as JumpCommandAttribute).mCommand;
-                        string help        = (a as JumpCommandAttribute).mHelp;
+                    if(a.GetType() == typeof(JumpCommandRegister) ) {
+                        string commandName = (a as JumpCommandRegister).mCommand;
+                        string help        = (a as JumpCommandRegister).mHelp;
                         if(mCmdLst.ContainsKey(commandName)) {
                             Debug.LogError(string.Format("Can not register function {0} as command \"{1}\", \"{1}\" is already used by {2}.{3}", 
                                 m.Name, commandName, mCmdLst[commandName].Type.Name, mCmdLst[commandName].Method.Name));
@@ -93,7 +93,7 @@ static public class JumpCommand {
         return result;            
     }
 
-    [JumpCommandAttribute("ls","list all the command")]
+    [JumpCommandRegister("ls","list all the command")]
     static private void OutputAllCommnd() {
         foreach(var c in mCmdLst.Values) {
             string paramInfo = "(";
