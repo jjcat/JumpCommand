@@ -1,7 +1,7 @@
 JumpCommand
 ===========
 
-A develop tool for Unity3d let you input command string to execute debug functions.
+A develop console for Unity let you input command string to execute debug functions.
 
 # Screenshot
 ![screenshot](http://i.imgur.com/tbmLPVR.png)
@@ -24,7 +24,7 @@ Here is a example:
 
 ```
 [JumpCommandAttribute["test","output integer"]]
-static public CommandTest(int i) {
+static public void CommandTest(int i) {
     Debug.Log(i.ToString());
 }
 
