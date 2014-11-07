@@ -1,6 +1,5 @@
 ﻿using System;
 
-
 public class JumpCommandAttribute : Attribute {
 	public string mCommand;
 	public string mHelp;
