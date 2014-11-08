@@ -9,7 +9,7 @@ A develop console for Unity let you input command string to execute debug functi
 # Installation 
  
 1. Copy JumpCommand directory to your project folder.
-2. Create a GameObject in the scene and add a JumpCommand component to it.
+2. Create a GameObject in the scene and add a JumpCommandGUI component to it.
 3. Run your game and press `~` to open command input.
 4. Input some command and press `Enter` to execute.
 5. Press `~` again to close command input.
