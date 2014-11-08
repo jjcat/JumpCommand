@@ -15,7 +15,7 @@ A develop console for Unity let you input command string to execute debug functi
 5. Press `~` again to close command input.
 
 # Registering Custom Commands
-JumpCommand can only register static function and class function that inherited from Monobehaviour. If the function's parameter type is not native type(int, float, double, stirng, bool), you will need write Type Converter for you custom parameter type. 
+JumpCommand can only register static function and class function that inherited from Monobehaviour. If the function's parameter type is not native type(int, float, double, string, bool, enum), you will need write Type Converter for you custom parameter type. 
 
 1. Add JumpCommandRegister to function
 2. If the function is Monobehaviour, you need select GameObject at Hierarchy window when you call it.
@@ -49,7 +49,7 @@ If the function is static, just add JumpCommandRegister and call it.
 If the function is Monobehaviour class, add JumpCommandRegister and select the GameObject when you call it.
 
 # Write Type Converter for Custom Parameter Type
-Most native data types (int, float, bool) have default type converters, so you don't need to write converts for them. JumpCommand can convert string arguments to proper parameters. If you want to use custom parameter type, you need to write Type Converter for your type. There is a reference [How to: Implement a Type Converter](http://msdn.microsoft.com/en-us/library/ayybcxe5.aspx "How to: Implement a Type Converter") at MSDN show you how to write a converter to convert string to Point class. 
+Most native data types (int, float, double, string, bool, enum) have default type converters, so you don't need to write converts for them. JumpCommand can convert string arguments to proper parameters. If you want to use custom parameter type, you need to write Type Converter for your type. There is a reference [How to: Implement a Type Converter](http://msdn.microsoft.com/en-us/library/ayybcxe5.aspx "How to: Implement a Type Converter") at MSDN show you how to write a converter to convert string to Point class. 
 
 # Contact Author
 Feel free to ask me any question.
