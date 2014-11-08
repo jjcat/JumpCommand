@@ -24,7 +24,7 @@ I
 下面的例子为一个静态函数注册了一条命令`test`。
 
 
-```charp
+```csharp
 [JumpCommandRegister["test","output integer"]]
 static public void CommandTest(int i) {
     Debug.Log(i.ToString());
@@ -36,7 +36,7 @@ static public void CommandTest(int i) {
 
 下面的例子为一个MonoBehaviour类的AdjustSpeed函数注册了一条命令`speed`。
 
-```charp
+```csharp
 //Person.cs
 public class Person :  MonoBehaviour {
     //...
