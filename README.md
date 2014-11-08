@@ -3,6 +3,8 @@ JumpCommand
 
 A develop console for Unity let you input command string to execute debug functions.
 
+######Read Chinese Version[中文版](https://github.com/jjcat/JumpCommand/blob/master/README_cn.md#jumpcommand)
+
 # Screenshot
 ![screenshot](http://i.imgur.com/tbmLPVR.png)
 
