@@ -25,7 +25,7 @@ JumpCommand can only register static function and class function that inherited 
 Here is a example:
 
 ```csharp
-[JumpCommandRegister["test","output integer"]]
+[JumpCommandRegister("test","output integer")]
 static public void CommandTest(int i) {
     Debug.Log(i.ToString());
 }
@@ -39,7 +39,7 @@ If you want to change a person's speed from command like `speed 0.5`, add JumpCo
 //Person.cs
 public class Person :  MonoBehaviour {
     //...
-	[JumpCommandRegister["speed","Change person speed"]]
+	[JumpCommandRegister("speed","Change person speed")]
 	public void AdjustSpeed(float value) {
 	    speed += value;
 	}
