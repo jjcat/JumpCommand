@@ -30,7 +30,7 @@ public class JumpCommandGUI : MonoBehaviour {
 	        JumpCommand.Execute(input);
 	    }
 	    catch {
-	      Debug.LogError("Execute Faield ");
+	      Debug.LogError("Execute Failed ");
 	      return;
 	    }
 	}
