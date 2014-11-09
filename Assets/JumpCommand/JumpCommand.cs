@@ -9,8 +9,11 @@ using Object = System.Object;
 using Debug = UnityEngine.Debug;
 
 static public class JumpCommand {
-    static private Dictionary<string, JumpCommandObject> mCmdLst = new Dictionary<string, JumpCommandObject>();
-    static public  Object       Callee {get;set;}
+    static private  Dictionary<string, JumpCommandObject> mCmdLst = new Dictionary<string, JumpCommandObject>();
+    static public   Object       Callee {get;set;}
+    static private  List<string> History = new List<string>();
+    static private  int  MaxHistoryNum = 100; 
+    static private  int FirstHistoryIndex = -1;
     static JumpCommand() {}
 
     static public void Awake() {
@@ -45,8 +48,34 @@ static public class JumpCommand {
         return mCmdLst.ContainsKey(commandName);
     }
 
+    // retrieve i-th history command, 0 is newest one.
+    static public string GetHistory(int i) {
+        if(History.Count == 0) return "";
+        else return History[(FirstHistoryIndex + MaxHistoryNum - i) % MaxHistoryNum];
+    }
+
+    static private void AddHistory(string command) {
+        FirstHistoryIndex = (FirstHistoryIndex + 1)%MaxHistoryNum;
+        if(History.Count == MaxHistoryNum) {
+            History[FirstHistoryIndex] = command;
+        }
+        else {
+            History.Add(command);
+        }
+    }
+
+    static public int HistoryNum {
+        get {return History.Count;}
+    }
+
+    static public void CleanHistory() {
+        History.Clear();
+        FirstHistoryIndex = -1;
+    }
+
     static public void Execute(string command) {
 #if UNITY_EDITOR
+        AddHistory(command);
         string[] argv = ParseArguments(command);
         if (argv.Length == 0) {
             Debug.LogError("Command is empty");
