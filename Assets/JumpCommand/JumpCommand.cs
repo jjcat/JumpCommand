@@ -73,6 +73,29 @@ static public class JumpCommand {
         FirstHistoryIndex = -1;
     }
 
+	static public string GetAutoCompletionCommand(string Cmd)
+	{
+		List<string> CmdArray = new List<string>();
+
+		// Go through and get all commands start with input command
+		foreach(string key in mCmdLst.Keys)
+		{
+			if (key.ToUpper().StartsWith(Cmd.ToUpper()))
+			{
+				CmdArray.Add(key);
+			}
+		}
+
+		// Choose first matched command
+		if (CmdArray.Count != 0)
+		{
+			CmdArray.Sort();
+			return CmdArray[0];
+		}
+
+		return null;
+	}
+
     static public void Execute(string command) {
 #if UNITY_EDITOR
         AddHistory(command);
