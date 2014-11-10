@@ -27,13 +27,19 @@ public class JumpCommandObject  {
         ParameterInfo[] paramInfoLst = Method.GetParameters();
         Object[] paramLst = new Object[paramInfoLst.Length];
         
-        if(paramInfoLst.Length != paramStr.Length) {
-            Debug.LogError(string.Format("{0} need {1} parameters, but received {2} parameters", Method.Name, paramInfoLst.Length, paramStr.Length));
-            return false;
-        }
-        
         for (int i = 0; i < paramInfoLst.Length; ++i) {
-            paramLst[i] = TypeDescriptor.GetConverter(paramInfoLst[i].ParameterType).ConvertFrom(paramStr[i]);
+            if(i >= paramStr.Length) { // if param string item number is less than param info item number, check defalut value from param info. 
+                if(paramInfoLst[i].RawDefaultValue == null) {
+                   Debug.LogError(string.Format("Missing argument '#{0}' when call method {1}", i, Method.Name));
+                   return false;
+                }
+                else {
+                    paramLst[i] = paramInfoLst[i].RawDefaultValue;    
+                }
+            }
+            else {
+                paramLst[i] = TypeDescriptor.GetConverter(paramInfoLst[i].ParameterType).ConvertFrom(paramStr[i]);
+            }
         }
 
         // call method with parameter list

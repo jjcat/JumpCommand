@@ -154,7 +154,7 @@ public class JumpCommandGUI : MonoBehaviour {
     }
 
     [JumpCommandRegister("cd", "Change game object")]
-    static private void ChangeGameObjectCallee(string gameObjectPath) {
+    static private void ChangeGameObjectCallee(string gameObjectPath = "") {
         if(gameObjectPath == "..") {  // return to parent game object
             if(JumpCommand.Callee is GameObject) {
                 var go = JumpCommand.Callee as GameObject;
@@ -166,7 +166,7 @@ public class JumpCommandGUI : MonoBehaviour {
                 }
             }
         }
-        else if(gameObjectPath == "~") {  // go to current selected game object
+        else if(gameObjectPath == "~" || gameObjectPath == "") {  // go to current selected game object
             JumpCommand.SetCallee(Selection.activeGameObject);
         }
         else if(gameObjectPath == "/") {  // go to root, always null
