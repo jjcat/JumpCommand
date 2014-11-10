@@ -73,13 +73,16 @@ public class JumpCommandGUI : MonoBehaviour {
         TextEditor te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
 
         // Press tab to switch among auto-completion commands
-        if (KeyDown("tab") && te.selectPos != te.pos)
+        if (KeyDown("tab"))
         {
             // eg: com[mand]
             // The unselected part of a command
             string substr = input.Substring(0, te.pos);
-            input = JumpCommand.GetAutoCompletionCommand(substr, input);
-            te.selectPos = input.Length;
+            string result = JumpCommand.GetAutoCompletionCommand(substr, input);
+            if(result != null) {
+                input = result;
+                te.selectPos = input.Length;
+            }
         }
     }
 
