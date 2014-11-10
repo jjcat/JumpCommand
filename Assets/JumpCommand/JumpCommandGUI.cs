@@ -16,6 +16,7 @@ public class JumpCommandGUI : MonoBehaviour {
     int    historyIndex = -1; // -1 means current input
     int    cursorPos    = -1;
     string prompt       = "";
+    GameObject lastSelection = null;
 
     // Use this for initialization
     void Awake () {
@@ -152,8 +153,41 @@ public class JumpCommandGUI : MonoBehaviour {
         }
     }
 
+    [JumpCommandRegister("cd", "Change game object")]
+    static private void ChangeGameObjectCallee(string gameObjectPath) {
+        if(gameObjectPath == "..") {  // return to parent game object
+            if(JumpCommand.Callee is GameObject) {
+                var go = JumpCommand.Callee as GameObject;
+                if(go.transform.parent == null) {
+                    JumpCommand.SetCallee(null);    
+                }
+                else {
+                    JumpCommand.SetCallee(go.transform.parent.gameObject); 
+                }
+            }
+        }
+        else if(gameObjectPath == "~") {  // go to current selected game object
+            JumpCommand.SetCallee(Selection.activeGameObject);
+        }
+        else if(gameObjectPath == "/") {  // go to root, always null
+            JumpCommand.SetCallee(null);
+        }
+        // TODO, parse gameObjectPath and update callee.
+    }
+
+    [JumpCommandRegister("sel", "Select callee in the Inspector")]
+    static private void SelectCallee() {
+        if(JumpCommand.Callee is GameObject) {
+            Selection.activeGameObject = (JumpCommand.Callee as GameObject);
+        }
+    }
+
     private void OnCloseConsoleAction() {
         enable       = false;
+    }
+
+    private void OnSelectionChangedAction() {
+        JumpCommand.SetCallee(Selection.activeGameObject);
     }
 
     public void Update() {
@@ -168,8 +202,9 @@ public class JumpCommandGUI : MonoBehaviour {
 
 #if UNITY_EDITOR
         // update selected game object as callee.
-        if(Selection.activeGameObject != JumpCommand.Callee) {
-            JumpCommand.SetCallee(Selection.activeGameObject);
+        if(Selection.activeGameObject != lastSelection) {
+            lastSelection = Selection.activeGameObject;
+            OnSelectionChangedAction();
         }
 #endif
     }
@@ -182,6 +217,7 @@ public class JumpCommandGUI : MonoBehaviour {
         cursorPos    = -1;
         historyIndex = -1;
         UpdatePrompt();
+        lastSelection = null;
     }
 
     void OnGUI() {
