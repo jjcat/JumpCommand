@@ -1,7 +1,4 @@
 ﻿using UnityEngine;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -10,10 +7,11 @@ using Debug = UnityEngine.Debug;
 
 static public class JumpCommand {
     static private  Dictionary<string, JumpCommandObject> mCmdLst = new Dictionary<string, JumpCommandObject>();
-    static public   Object       Callee {get;set;}
+    static public   Object       Callee {get;private set;}
     static private  List<string> History = new List<string>();
     static private  int  MaxHistoryNum = 100; 
     static private  int  FirstHistoryIndex = -1;
+    static public   event Action<Object> OnChangeCallee;
     static JumpCommand() {}
 
     static public void Awake() {
@@ -21,7 +19,6 @@ static public class JumpCommand {
     }
 
     static private void RegisterAllCommandObjects() {
-#if UNITY_EDITOR
         mCmdLst.Clear();
         var csharpDLL = Assembly.GetExecutingAssembly();  // unity csharp.dll assembly
 
@@ -43,7 +40,6 @@ static public class JumpCommand {
                 }
             }
         }
-#endif
     }
 
     static public bool Constains(string commandName) {
@@ -105,7 +101,6 @@ static public class JumpCommand {
     }
 
     static public void Execute(string command) {
-#if UNITY_EDITOR
         AddHistory(command);
         string[] argv = ParseArguments(command);
         if (argv.Length == 0) {
@@ -116,9 +111,10 @@ static public class JumpCommand {
             JumpCommandObject cmd = mCmdLst[argv[0]];
             string[] paramStr = new string[argv.Length - 1];
             Array.Copy(argv,1,paramStr,0,argv.Length-1);
-            if(Application.isEditor && !mCmdLst[argv[0]].Method.IsStatic) {  // the callee will be the current select game object
-                if(Selection.activeGameObject != null) {
-                    var component = Selection.activeGameObject.GetComponent(mCmdLst[argv[0]].Type);
+            if(!mCmdLst[argv[0]].Method.IsStatic) {  // the callee will be the current select game object
+                if(Callee is GameObject) {
+                    var go = Callee as GameObject;
+                    var component = go.GetComponent(mCmdLst[argv[0]].Type);
                     cmd.Call(paramStr, component);
                 }
                 else {
@@ -132,7 +128,6 @@ static public class JumpCommand {
         else {
             Debug.LogError(string.Format("Can not find command \"{0}\"",argv[0]));
         }
-#endif
     }
 
     static private string[] ParseArguments(string commandLine) {
@@ -163,6 +158,15 @@ static public class JumpCommand {
             paramInfo += ")";
             Debug.Log(string.Format("{0,-10} {1}: \"{2}\"", c.Command, paramInfo, c.Help));
         }        
+    }
+
+    static public void SetCallee(Object callee) {
+        if(callee != Callee) {
+            Callee = callee;
+            if(OnChangeCallee != null) {
+                OnChangeCallee(Callee);
+            }
+        }
     }
 }
 

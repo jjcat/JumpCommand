@@ -1,8 +1,11 @@
 ﻿using UnityEngine;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using System;
 using System.Text;
 using System.Collections.Generic;
+using Object = System.Object;
 
 public class JumpCommandGUI : MonoBehaviour {
 
@@ -17,10 +20,15 @@ public class JumpCommandGUI : MonoBehaviour {
     // Use this for initialization
     void Awake () {
         JumpCommand.Awake();
+        JumpCommand.OnChangeCallee += HandleChangeCalleeEvent;
     }
     
     private bool KeyDown(string key) {
         return Event.current.Equals(Event.KeyboardEvent(key));
+    }
+
+    private void HandleChangeCalleeEvent(Object callee) {
+        UpdatePrompt();
     }
 
 
@@ -59,12 +67,16 @@ public class JumpCommandGUI : MonoBehaviour {
         return sb.ToString();
     }
 
+    // update callee name that will invoke the command
     private void UpdatePrompt() {
-        if(Selection.activeGameObject == null) {
+        if(JumpCommand.Callee == null) {
             prompt = ">";       
         }
-        else {
-            prompt = GetGameObjectFullName(Selection.activeGameObject) + ">";
+        else if(JumpCommand.Callee is GameObject){
+            prompt = GetGameObjectFullName(JumpCommand.Callee as GameObject) + ">";
+        }
+        else {  // if Callee is not type of GameObject, let it empty now.
+            prompt = ">";
         }
     }
 
@@ -145,7 +157,6 @@ public class JumpCommandGUI : MonoBehaviour {
     }
 
     public void Update() {
-        UpdatePrompt();
         if (Input.GetKeyDown(KeyCode.BackQuote)) {
             if(!enable) {
                 Invoke("OnOpenConsoleAction", 0.1f); // delay 0.1s to fix input text receive backquote
@@ -154,6 +165,13 @@ public class JumpCommandGUI : MonoBehaviour {
                 OnCloseConsoleAction();
             }
         }
+
+#if UNITY_EDITOR
+        // update selected game object as callee.
+        if(Selection.activeGameObject != JumpCommand.Callee) {
+            JumpCommand.SetCallee(Selection.activeGameObject);
+        }
+#endif
     }
 
     public void OnOpenConsoleAction() {   
@@ -163,8 +181,8 @@ public class JumpCommandGUI : MonoBehaviour {
         focus        = true;
         cursorPos    = -1;
         historyIndex = -1;
+        UpdatePrompt();
     }
-
 
     void OnGUI() {
         if(!enable) return;
@@ -176,7 +194,7 @@ public class JumpCommandGUI : MonoBehaviour {
 
         GUILayout.Label(prompt);
         String lastInput = input;
-        input = GUILayout.TextField(input, GUILayout.Width(Screen.width));
+        input = GUILayout.TextField(input,GUILayout.Width(Screen.width));
 
         if (lastInput != input ) 
         {
