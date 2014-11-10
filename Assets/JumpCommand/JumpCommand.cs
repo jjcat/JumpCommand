@@ -73,7 +73,7 @@ static public class JumpCommand {
         FirstHistoryIndex = -1;
     }
 
-    static public string GetAutoCompletionCommand(string Cmd)
+    static public string GetAutoCompletionCommand(string Cmd, string FullCmd = "")
     {
         List<string> CmdArray = new List<string>();
 
@@ -90,7 +90,19 @@ static public class JumpCommand {
         if (CmdArray.Count != 0)
         {
             CmdArray.Sort();
-            return CmdArray[0];
+
+            int index = CmdArray.IndexOf(FullCmd);
+
+            if (index != -1)
+            {
+                index++;
+                index %= CmdArray.Count;
+                return CmdArray[index];
+            }
+            else
+            {
+                return CmdArray[0];
+            }
         }
 
         return null;

@@ -8,7 +8,7 @@ public class JumpCommandGUI : MonoBehaviour {
     bool   enable = false;
     bool   focus = false;
     int    historyIndex = -1; // -1 means current input
-    int       cursorPos = -1;
+    int    cursorPos = -1;
 
     // Use this for initialization
     void Awake () {
@@ -68,13 +68,18 @@ public class JumpCommandGUI : MonoBehaviour {
         }
     }
 
-    private void HandleAcceptAutoCompletion()
+    private void HandleTab()
     {
         TextEditor te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
 
+        // Press tab to switch among auto-completion commands
         if (KeyDown("tab") && te.selectPos != te.pos)
         {
-            cursorPos = te.selectPos = te.pos = input.Length;
+            // eg: com[mand]
+            // The unselected part of a command
+            string substr = input.Substring(0, te.pos);
+            input = JumpCommand.GetAutoCompletionCommand(substr, input);
+            te.selectPos = input.Length;
         }
     }
 
@@ -140,7 +145,7 @@ public class JumpCommandGUI : MonoBehaviour {
         {
             HandleAutoCompletion();
         }
-        HandleAcceptAutoCompletion();
+        HandleTab();
 
         if (focus) {
             GUI.FocusControl("input");
