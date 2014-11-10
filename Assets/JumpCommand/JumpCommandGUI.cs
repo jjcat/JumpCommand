@@ -8,7 +8,7 @@ public class JumpCommandGUI : MonoBehaviour {
     bool   enable = false;
     bool   focus = false;
     int    historyIndex = -1; // -1 means current input
-	int	   cursorPos = -1;
+    int       cursorPos = -1;
 
     // Use this for initialization
     void Awake () {
@@ -68,39 +68,39 @@ public class JumpCommandGUI : MonoBehaviour {
         }
     }
 
-	private void HandleAcceptAutoCompletion()
-	{
-		TextEditor te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
+    private void HandleAcceptAutoCompletion()
+    {
+        TextEditor te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
 
-		if (KeyDown("tab") && te.selectPos != te.pos)
-		{
-			cursorPos = te.selectPos = te.pos = input.Length;
-		}
-	}
+        if (KeyDown("tab") && te.selectPos != te.pos)
+        {
+            cursorPos = te.selectPos = te.pos = input.Length;
+        }
+    }
 
-	private void HandleAutoCompletion()
-	{
-		// if we hit backspace, don't auto complete
-		if (input.Length <= cursorPos)
-		{
-			cursorPos = input.Length;
-			return;
-		}
+    private void HandleAutoCompletion()
+    {
+        // if we hit backspace, don't auto complete
+        if (input.Length <= cursorPos)
+        {
+            cursorPos = input.Length;
+            return;
+        }
 
-		string AutoCompletion = JumpCommand.GetAutoCompletionCommand(input);
-		if (AutoCompletion != null)
-		{
-			TextEditor te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
-			
-			if (te != null)
-			{
-				cursorPos = te.pos = input.Length;  //set cursor position
-				te.selectPos = AutoCompletion.Length;  //set selection cursor position
-			}
+        string AutoCompletion = JumpCommand.GetAutoCompletionCommand(input);
+        if (AutoCompletion != null)
+        {
+            TextEditor te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
+            
+            if (te != null)
+            {
+                cursorPos = te.pos = input.Length;  //set cursor position
+                te.selectPos = AutoCompletion.Length;  //set selection cursor position
+            }
 
-			input = AutoCompletion;
-		}
-	}
+            input = AutoCompletion;
+        }
+    }
 
     private void OnCloseConsoleAction() {
         enable = false;
@@ -133,14 +133,14 @@ public class JumpCommandGUI : MonoBehaviour {
         HandleUpOrDown();
         GUI.SetNextControlName("input");
 
-		String LastInput = input;
+        String LastInput = input;
         input = GUILayout.TextField(input, GUILayout.Width(Screen.width));
 
-		if (LastInput != input)
-		{
-			HandleAutoCompletion();
-		}
-		HandleAcceptAutoCompletion();
+        if (LastInput != input)
+        {
+            HandleAutoCompletion();
+        }
+        HandleAcceptAutoCompletion();
 
         if (focus) {
             GUI.FocusControl("input");
