@@ -6,9 +6,9 @@ using Object = System.Object;
 
 
 public class JumpCommandObject  {
-    public string      Command{get;private set;}
-    public MethodInfo  Method {get;private set;}
-    public string      Help   {get;private set;}
+    public string      Command {get;private set;}
+    public MethodInfo  Method  {get;private set;}
+    public string      Help    {get;private set;}
     public Type Type {
         get {
             return Method.DeclaringType;
@@ -26,6 +26,7 @@ public class JumpCommandObject  {
         // create parameter list
         ParameterInfo[] paramInfoLst = Method.GetParameters();
         Object[] paramLst = new Object[paramInfoLst.Length];
+        
         if(paramInfoLst.Length != paramStr.Length) {
             Debug.LogError(string.Format("{0} need {1} parameters, but received {2} parameters", Method.Name, paramInfoLst.Length, paramStr.Length));
             return false;
@@ -35,7 +36,7 @@ public class JumpCommandObject  {
             paramLst[i] = TypeDescriptor.GetConverter(paramInfoLst[i].ParameterType).ConvertFrom(paramStr[i]);
         }
 
-        // call methord with parameter list
+        // call method with parameter list
         if(Method.IsStatic) {
             Method.Invoke(null, paramLst);
         }

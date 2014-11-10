@@ -1,11 +1,11 @@
 ﻿using System;
 
 public class JumpCommandRegister : Attribute {
-	public string mCommand;
-	public string mHelp;
+	public string command;
+	public string help;
 
 	public JumpCommandRegister(string command, string help = "") {
-		mCommand  = command;
-		mHelp     = help;
+		this.command  = command;
+		this.help     = help;
 	}
 }

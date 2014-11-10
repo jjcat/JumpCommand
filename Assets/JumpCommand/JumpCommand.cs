@@ -13,7 +13,7 @@ static public class JumpCommand {
     static public   Object       Callee {get;set;}
     static private  List<string> History = new List<string>();
     static private  int  MaxHistoryNum = 100; 
-    static private  int FirstHistoryIndex = -1;
+    static private  int  FirstHistoryIndex = -1;
     static JumpCommand() {}
 
     static public void Awake() {
@@ -24,12 +24,14 @@ static public class JumpCommand {
 #if UNITY_EDITOR
         mCmdLst.Clear();
         var csharpDLL = Assembly.GetExecutingAssembly();  // unity csharp.dll assembly
-        foreach( var t in csharpDLL.GetTypes() ) {        
+
+        // find all type in csharp.dll, if type's attributes contains JumpCommandRegister, then register the command.
+        foreach( var t in csharpDLL.GetTypes()) {        
             foreach(var m in t.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)) {  
                 foreach(var a in m.GetCustomAttributes(true)) {
-                    if(a.GetType() == typeof(JumpCommandRegister) ) {
-                        string commandName = (a as JumpCommandRegister).mCommand;
-                        string help        = (a as JumpCommandRegister).mHelp;
+                    if(a.GetType() == typeof(JumpCommandRegister)) {
+                        string commandName = (a as JumpCommandRegister).command;
+                        string help        = (a as JumpCommandRegister).help;
                         if(mCmdLst.ContainsKey(commandName)) {
                             Debug.LogError(string.Format("Can not register function {0} as command \"{1}\", \"{1}\" is already used by {2}.{3}", 
                                 m.Name, commandName, mCmdLst[commandName].Type.Name, mCmdLst[commandName].Method.Name));
@@ -73,35 +75,29 @@ static public class JumpCommand {
         FirstHistoryIndex = -1;
     }
 
-    static public string GetAutoCompletionCommand(string Cmd, string FullCmd = "")
-    {
-        List<string> CmdArray = new List<string>();
+    static public string GetAutoCompletionCommand(string command, string fullCommand = "") {
+        List<string> result = new List<string>();
 
         // Go through and get all commands start with input command
-        foreach(string key in mCmdLst.Keys)
-        {
-            if (key.ToUpper().StartsWith(Cmd.ToUpper()))
-            {
-                CmdArray.Add(key);
+        foreach(string key in mCmdLst.Keys) {
+            if (key.ToUpper().StartsWith(command.ToUpper())) {
+                result.Add(key);
             }
         }
 
         // Choose first matched command
-        if (CmdArray.Count != 0)
-        {
-            CmdArray.Sort();
+        if (result.Count != 0) {
+            result.Sort();
 
-            int index = CmdArray.IndexOf(FullCmd);
+            int index = result.IndexOf(fullCommand);
 
-            if (index != -1)
-            {
+            if (index != -1) {
                 index++;
-                index %= CmdArray.Count;
-                return CmdArray[index];
+                index %= result.Count;
+                return result[index];
             }
-            else
-            {
-                return CmdArray[0];
+            else {
+                return result[0];
             }
         }
 

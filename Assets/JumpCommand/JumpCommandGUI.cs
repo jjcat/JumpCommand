@@ -3,19 +3,18 @@ using System;
 
 public class JumpCommandGUI : MonoBehaviour {
 
-    string input = "";
-    string inputCopy = "";
-    bool   enable = false;
-    bool   focus = false;
+    string input        = "";
+    string inputCopy    = "";
+    bool   enable       = false;
+    bool   focus        = false;
     int    historyIndex = -1; // -1 means current input
-    int    cursorPos = -1;
+    int    cursorPos    = -1;
 
     // Use this for initialization
     void Awake () {
         JumpCommand.Awake();
     }
     
-
     private bool KeyDown(string key) {
         return Event.current.Equals(Event.KeyboardEvent(key));
     }
@@ -26,6 +25,7 @@ public class JumpCommandGUI : MonoBehaviour {
             OnSumbitCommandAction();
             input = "";
             historyIndex = -1;
+            cursorPos    = -1;
         }
     }
 
@@ -34,7 +34,7 @@ public class JumpCommandGUI : MonoBehaviour {
             JumpCommand.Execute(input);
         }
         catch {
-          Debug.LogError("Execute Failed ");
+          Debug.LogError("Execute Failed");
           return;
         }
     }
@@ -43,11 +43,10 @@ public class JumpCommandGUI : MonoBehaviour {
     private void HandleEscape() {
         if (KeyDown("escape") || KeyDown("`")) {
             OnCloseConsoleAction();
-            input = "";
         }
     }
 
-    // fix cursorPos is wrong if pressing backspace.
+    // fix cursorPos is not correct if pressing backspace.
     private void HandleBackspace() {
         if(KeyDown("backspace")) {    
             cursorPos = input.Length;
@@ -84,61 +83,57 @@ public class JumpCommandGUI : MonoBehaviour {
         {
             // eg: com[mand]
             // The unselected part of a command
-            string substr = input.Substring(0, te.pos);
-            string result = JumpCommand.GetAutoCompletionCommand(substr, input);
-            if(result != null) {
-                input = result;
+            string substr  = input.Substring(0, te.pos);
+            string command = JumpCommand.GetAutoCompletionCommand(substr, input);
+            if(command != null) {
+                input = command;
                 te.selectPos = input.Length;
             }
         }
     }
 
-    private void HandleAutoCompletion()
-    {
+    private void HandleAutoCompletion() {
         // if we hit backspace, don't auto complete
-        if (input.Length <= cursorPos)
-        {
+        if (input.Length <= cursorPos) {
             cursorPos = input.Length;
             return;
         }
 
-        string AutoCompletion = JumpCommand.GetAutoCompletionCommand(input);
-        if (AutoCompletion != null)
-        {
+        string autoCompletion = JumpCommand.GetAutoCompletionCommand(input);
+        if (autoCompletion != null) {
             TextEditor te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
             
-            if (te != null)
-            {
+            if (te != null) {
                 cursorPos = te.pos = input.Length;  //set cursor position
-                te.selectPos = AutoCompletion.Length;  //set selection cursor position
+                te.selectPos = autoCompletion.Length;  //set selection cursor position
             }
 
-            input = AutoCompletion;
+            input = autoCompletion;
         }
     }
 
     private void OnCloseConsoleAction() {
-        enable = false;
-        historyIndex = -1;
+        enable       = false;
     }
 
     public void Update() {
         if (Input.GetKeyDown(KeyCode.BackQuote)) {
             if(!enable) {
-                Invoke("OnOpenConsoleAction",0.1f); // delay 0.1s to fix input text receive backquote
+                Invoke("OnOpenConsoleAction", 0.1f); // delay 0.1s to fix input text receive backquote
             }
             else {
-                enable = false;
                 OnCloseConsoleAction();
             }
         }
     }
 
     public void OnOpenConsoleAction() {   
-        enable = true;
-        input = "";
-        focus = true;
-        cursorPos = -1;
+        enable       = true;
+        input        = "";
+        inputCopy    = "";
+        focus        = true;
+        cursorPos    = -1;
+        historyIndex = -1;
     }
 
 
@@ -150,10 +145,10 @@ public class JumpCommandGUI : MonoBehaviour {
         HandleBackspace();
         GUI.SetNextControlName("input");
 
-        String LastInput = input;
+        String lastInput = input;
         input = GUILayout.TextField(input, GUILayout.Width(Screen.width));
 
-        if (LastInput != input ) 
+        if (lastInput != input ) 
         {
             HandleAutoCompletion();
         }
