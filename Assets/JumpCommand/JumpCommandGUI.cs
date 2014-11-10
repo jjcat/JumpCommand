@@ -47,6 +47,13 @@ public class JumpCommandGUI : MonoBehaviour {
         }
     }
 
+    // fix cursorPos is wrong if pressing backspace.
+    private void HandleBackspace() {
+        if(KeyDown("backspace")) {    
+            cursorPos = input.Length;
+        }
+    }
+
     private void HandleUpOrDown() {
         if(KeyDown("up") || KeyDown("down")) {
             int step = 1;
@@ -131,6 +138,7 @@ public class JumpCommandGUI : MonoBehaviour {
         enable = true;
         input = "";
         focus = true;
+        cursorPos = -1;
     }
 
 
@@ -139,12 +147,13 @@ public class JumpCommandGUI : MonoBehaviour {
         HandleSubmit();
         HandleEscape();
         HandleUpOrDown();
+        HandleBackspace();
         GUI.SetNextControlName("input");
 
         String LastInput = input;
         input = GUILayout.TextField(input, GUILayout.Width(Screen.width));
 
-        if (LastInput != input)
+        if (LastInput != input ) 
         {
             HandleAutoCompletion();
         }
