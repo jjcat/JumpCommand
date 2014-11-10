@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
+using UnityEditor;
 using System;
+using System.Text;
+using System.Collections.Generic;
 
 public class JumpCommandGUI : MonoBehaviour {
 
@@ -9,6 +12,7 @@ public class JumpCommandGUI : MonoBehaviour {
     bool   focus        = false;
     int    historyIndex = -1; // -1 means current input
     int    cursorPos    = -1;
+    string prompt       = "";
 
     // Use this for initialization
     void Awake () {
@@ -39,6 +43,30 @@ public class JumpCommandGUI : MonoBehaviour {
         }
     }
 
+    private string GetGameObjectFullName(GameObject go) {
+        StringBuilder sb = new StringBuilder(128);
+        GameObject parent = go;
+        List<GameObject> parents = new List<GameObject>();
+        while(parent.transform.parent != null) {
+            parents.Add(parent);
+            parent = parent.transform.parent.gameObject;
+        }
+        parents.Add(parent);
+
+        for(int i = parents.Count-1; i >= 0; i--) {
+            sb.Append("/" + parents[i].name);    
+        }
+        return sb.ToString();
+    }
+
+    private void UpdatePrompt() {
+        if(Selection.activeGameObject == null) {
+            prompt = ">";       
+        }
+        else {
+            prompt = GetGameObjectFullName(Selection.activeGameObject) + ">";
+        }
+    }
 
     private void HandleEscape() {
         if (KeyDown("escape") || KeyDown("`")) {
@@ -117,6 +145,7 @@ public class JumpCommandGUI : MonoBehaviour {
     }
 
     public void Update() {
+        UpdatePrompt();
         if (Input.GetKeyDown(KeyCode.BackQuote)) {
             if(!enable) {
                 Invoke("OnOpenConsoleAction", 0.1f); // delay 0.1s to fix input text receive backquote
@@ -145,6 +174,7 @@ public class JumpCommandGUI : MonoBehaviour {
         HandleBackspace();
         GUI.SetNextControlName("input");
 
+        GUILayout.Label(prompt);
         String lastInput = input;
         input = GUILayout.TextField(input, GUILayout.Width(Screen.width));
 
