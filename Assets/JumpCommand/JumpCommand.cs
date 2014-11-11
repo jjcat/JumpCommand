@@ -148,7 +148,7 @@ static public class JumpCommand {
         return result;            
     }
 
-    [JumpCommandRegister("ls","list all the command")]
+    [JumpCommandRegister("help","list all the command")]
     static private void OutputAllCommnd() {
         foreach(var c in mCmdLst.Values) {
             string paramInfo = "(";

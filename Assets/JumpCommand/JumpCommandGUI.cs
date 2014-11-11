@@ -55,6 +55,23 @@ public class JumpCommandGUI : MonoBehaviour {
         }
     }
 
+    [JumpCommandRegister("ls", "List children of callee, if callee is null list all root game objects")]
+    static private void ListChildren() {
+        if(JumpCommand.Callee is GameObject) {
+            var go = JumpCommand.Callee as GameObject;
+            for(int i = 0; i < go.transform.childCount; i++) {
+                Debug.Log(go.transform.GetChild(i).name);
+            }
+        }
+        else if(JumpCommand.Callee == null){
+            foreach (GameObject go in UnityEngine.Object.FindObjectsOfType(typeof(GameObject))) {
+                if (go.transform.parent == null) {
+                    Debug.Log(go.name);
+                }
+            }
+        }
+    }
+
     private string GetGameObjectFullName(GameObject go) {
         StringBuilder sb = new StringBuilder(128);
         GameObject parent = go;
