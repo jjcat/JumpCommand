@@ -72,7 +72,11 @@ public class JumpCommandGUI : MonoBehaviour {
         }
     }
 
-    private string GetGameObjectFullName(GameObject go) {
+    static private string GetGameObjectFullName(GameObject go) {
+        if(go == null) {
+            return "";
+        }
+
         StringBuilder sb = new StringBuilder(128);
         GameObject parent = go;
         List<GameObject> parents = new List<GameObject>();
@@ -192,7 +196,16 @@ public class JumpCommandGUI : MonoBehaviour {
         else if(gameObjectPath == "/") {  // go to root, always null
             JumpCommand.SetCallee(null);
         }
-        // TODO, parse gameObjectPath and update callee.
+        else {
+            string fullGameObjectPath = GetGameObjectFullName(JumpCommand.Callee as GameObject) +"/"+ gameObjectPath;
+            var foundOne = GameObject.Find(fullGameObjectPath);
+            if(foundOne != null) {
+                JumpCommand.SetCallee(foundOne);
+            }
+            else {
+                Debug.LogError("Can not found " + gameObjectPath);
+            }
+        }
     }
 
     [JumpCommandRegister("sel", "Select callee in the Inspector")]
