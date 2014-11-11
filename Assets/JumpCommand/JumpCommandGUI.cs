@@ -17,6 +17,9 @@ public class JumpCommandGUI : MonoBehaviour {
     int    cursorPos    = -1;
     string prompt       = "";
     GameObject lastSelection = null;
+    
+    [Tooltip("value between 0 and 1. 0 meas top of screen, 1 means bottom of screen.")]
+    public float  yPos   = 0f;
 
     // Use this for initialization
     void Awake () {
@@ -228,10 +231,13 @@ public class JumpCommandGUI : MonoBehaviour {
         HandleBackspace();
         GUI.SetNextControlName("input");
 
+        yPos = Mathf.Clamp(yPos, 0, 1f);
+        GUILayout.BeginArea(new Rect(0, (Screen.height - 50)*yPos, Screen.width, 50));
+        
         GUILayout.Label(prompt);
         String lastInput = input;
         input = GUILayout.TextField(input,GUILayout.Width(Screen.width));
-
+        GUILayout.EndArea();
         if (lastInput != input ) 
         {
             HandleAutoCompletion();
