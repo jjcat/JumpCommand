@@ -19,6 +19,7 @@ public class JumpCommandGUI : MonoBehaviour {
     GameObject lastSelection = null;
     
     [Tooltip("value between 0 and 1. 0 meas top of screen, 1 means bottom of screen.")]
+    [RangeAttribute(0,1f)]
     public float  yPos   = 0f;
 
     // Use this for initialization
@@ -261,7 +262,6 @@ public class JumpCommandGUI : MonoBehaviour {
         HandleBackspace();
         GUI.SetNextControlName("input");
 
-        yPos = Mathf.Clamp(yPos, 0, 1f);
         GUILayout.BeginArea(new Rect(0, (Screen.height - 50)*yPos, Screen.width, 50));
         
         GUILayout.Label(prompt);
