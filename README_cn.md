@@ -1,11 +1,11 @@
-#JumpCommand
+#![](http://i.imgur.com/rBXIi4Q.png)JumpCommand
 
 JumpCommand能在Unity中输入命令行来进行函数调用。
 
 ##截屏
 
 ![image](https://camo.githubusercontent.com/5072e4e11db963129193428bbb89af3d0fa50e4c/687474703a2f2f692e696d6775722e636f6d2f74626d4c5056522e706e67)
-I
+
 ##安装
 
 1. 拷贝*JumpCommand*文件夹到你的工程目录下。
