@@ -16,6 +16,19 @@ public class JumpCommandGUI : MonoBehaviour {
     int    historyIndex = -1; // -1 means current input
     int    cursorPos    = -1;
     string prompt       = "";
+    [HideInInspector]
+    GUIStyle style = new GUIStyle();  // popup list style
+    bool   enablePopupList = false;
+    string[] popupListContent = {"1","2","3","4"};
+    int    popupListSelected = 0;
+    Vector2 popupListScrollPos = Vector2.zero;
+
+    event  Action<string> OnReceiveDownAndUpEvent;
+    event  Action         OnReceiveEnterEvent;
+    event  Action         OnReceiveEscapeEvent;
+    event  Action         OnReceiveBackQuotaEvent;
+
+
     GameObject lastSelection = null;
     
     [Tooltip("value between 0 and 1. 0 meas top of screen, 1 means bottom of screen.")]
@@ -26,7 +39,27 @@ public class JumpCommandGUI : MonoBehaviour {
     void Awake () {
         JumpCommand.Awake();
         JumpCommand.OnChangeCallee += HandleChangeCalleeEvent;
+        CreatePopupListStyle();
     }
+
+    void CreatePopupListStyle() {
+        style.alignment = TextAnchor.MiddleLeft;
+        style.normal.textColor = Color.white;
+        var tex = new Texture2D(2, 2);
+        var colors = new Color[4]{Color.white,Color.white,Color.white,Color.white};
+        var bg = new Texture2D(2, 2);
+        var bgColor = new Color(0,0,0,0.5f);
+        var bgColors = new Color[4]{bgColor,bgColor,bgColor,bgColor};
+        tex.SetPixels(colors);
+        bg.SetPixels(bgColors);
+        tex.Apply();
+        bg.Apply();
+        style.normal.background = bg;
+        style.onNormal.background = tex;        
+        style.padding.left = style.padding.right = style.padding.top = style.padding.bottom = 4;        
+    }
+
+
     
     private bool KeyDown(string key) {
         return Event.current.Equals(Event.KeyboardEvent(key));
@@ -36,14 +69,16 @@ public class JumpCommandGUI : MonoBehaviour {
         UpdatePrompt();
     }
 
+    private void HandleSubmitPopupList() {
+        input = popupListContent[popupListSelected].Split(new char[1]{' '})[0];
+        ClosePopupList();         
+    }
 
-    private void HandleSubmit() {
-        if (KeyDown("[enter]") || KeyDown("return")) {
-            OnSumbitCommandAction();
-            input = "";
-            historyIndex = -1;
-            cursorPos    = -1;
-        }
+    private void HandleSubmitInput() {
+        OnSumbitCommandAction();
+        input = "";
+        historyIndex = -1;
+        cursorPos    = -1;
     }
 
     private void OnSumbitCommandAction() {
@@ -106,10 +141,20 @@ public class JumpCommandGUI : MonoBehaviour {
         }
     }
 
-    private void HandleEscape() {
-        if (KeyDown("escape") || KeyDown("`")) {
-            OnCloseConsoleAction();
-        }
+    private void HandleEscapeInput() {
+        OnCloseConsoleAction();
+    }
+
+    private void HandleBackQuotaInput() {
+        OnCloseConsoleAction();        
+    }
+
+    private void HandleBackQuotaPopupList() {
+        OnCloseConsoleAction();        
+    }
+
+    private void HandleEscapePopupList() {
+        ClosePopupList();
     }
 
     // fix cursorPos is not correct if pressing backspace.
@@ -119,23 +164,67 @@ public class JumpCommandGUI : MonoBehaviour {
         }
     }
 
-    private void HandleUpOrDown() {
-        if(KeyDown("up") || KeyDown("down")) {
-            int step = 1;
-            if(KeyDown("down")) {
-                step = -1;
-            }
+    private void HandleUpOrDownPopupList(string key) {
+        int step = -1;
+        if(key == "down") {
+            step = 1;
+        }
 
-            if(historyIndex == -1) {
-                inputCopy = input;  // save current input
-            }
+        popupListSelected = Mathf.Clamp(popupListSelected + step, 0, popupListContent.Length-1);
+    }
 
-            historyIndex = Mathf.Clamp(historyIndex+step, -1, JumpCommand.HistoryNum - 1);
-            if(historyIndex == -1) {
-                input = inputCopy;
+    private void HandleUpOrDownInput(string key) {
+        int step = 1;
+        if(key == "down") {
+            step = -1;
+        }
+
+        if(historyIndex == -1) {
+            inputCopy = input;  // save current input
+        }
+
+        historyIndex = Mathf.Clamp(historyIndex+step, -1, JumpCommand.HistoryNum - 1);
+        if(historyIndex == -1) {
+            input = inputCopy;
+        }
+        else {
+            input = JumpCommand.GetHistory(historyIndex);
+        }
+    }
+
+    private void DispatchSubmitEvent() {
+        if (KeyDown("[enter]") || KeyDown("return")) {
+            if(OnReceiveEnterEvent != null) {
+                OnReceiveEnterEvent();
             }
-            else {
-                input = JumpCommand.GetHistory(historyIndex);
+        }
+    }
+
+    private void DispatchUpOrDownEvent() {
+        if(KeyDown("down")) {
+            if(OnReceiveDownAndUpEvent != null) {
+                OnReceiveDownAndUpEvent("down");
+            }
+        }
+        else if(KeyDown("up")) {
+            if(OnReceiveDownAndUpEvent != null) {
+                OnReceiveDownAndUpEvent("up");
+            }
+        }
+    }
+
+    private void DispatchBackQuotaEvent() {
+        if(KeyDown("`")) {
+            if (OnReceiveBackQuotaEvent!= null){
+                OnReceiveBackQuotaEvent();
+            }            
+        }
+    }
+
+    private void DispatchEscapeEvent() {
+        if (KeyDown("escape") ) {
+            if (OnReceiveEscapeEvent!= null){
+                OnReceiveEscapeEvent();
             }
         }
     }
@@ -154,6 +243,22 @@ public class JumpCommandGUI : MonoBehaviour {
             if(command != null) {
                 input = command;
                 te.selectPos = input.Length;
+            }
+        }
+    }
+
+
+    private void ShouldOpemPopupList() {
+        List<string> autoCompletions = JumpCommand.GetAutoCompletionCommands(input);
+        if(autoCompletions.Count > 0 ) {
+            popupListContent = autoCompletions.ToArray();
+            if(!enablePopupList) {
+                OpenPopupList();
+            }
+        }        
+        else {
+            if(enablePopupList) {
+                ClosePopupList();
             }
         }
     }
@@ -218,6 +323,15 @@ public class JumpCommandGUI : MonoBehaviour {
 
     private void OnCloseConsoleAction() {
         enable       = false;
+        OnReceiveDownAndUpEvent -= HandleUpOrDownInput;
+        OnReceiveEnterEvent     -= HandleSubmitInput;
+        OnReceiveEscapeEvent    -= HandleEscapeInput;
+        OnReceiveBackQuotaEvent -= HandleBackQuotaInput;
+        OnReceiveDownAndUpEvent -= HandleUpOrDownPopupList;
+        OnReceiveEnterEvent     -= HandleSubmitPopupList;
+        OnReceiveEscapeEvent    -= HandleEscapePopupList;
+        OnReceiveBackQuotaEvent -= HandleBackQuotaPopupList;
+
     }
 
     private void OnSelectionChangedAction() {
@@ -252,25 +366,62 @@ public class JumpCommandGUI : MonoBehaviour {
         historyIndex = -1;
         UpdatePrompt();
         lastSelection = null;
+        enablePopupList = false;
+        OnReceiveDownAndUpEvent += HandleUpOrDownInput;
+        OnReceiveEnterEvent     += HandleSubmitInput;
+        OnReceiveEscapeEvent    += HandleEscapeInput;
+        OnReceiveBackQuotaEvent += HandleBackQuotaInput;
+    }
+
+    void OpenPopupList() {  
+        enablePopupList = true;
+        OnReceiveDownAndUpEvent -= HandleUpOrDownInput;
+        OnReceiveEscapeEvent    -= HandleEscapeInput;
+        OnReceiveBackQuotaEvent -= HandleBackQuotaInput;
+        OnReceiveEnterEvent     -= HandleSubmitInput;
+        OnReceiveDownAndUpEvent += HandleUpOrDownPopupList;
+        OnReceiveEscapeEvent    += HandleEscapePopupList;
+        OnReceiveBackQuotaEvent += HandleBackQuotaPopupList;
+        OnReceiveEnterEvent     += HandleSubmitPopupList;
+        popupListSelected = 0;
+    }
+
+    void ClosePopupList() {
+        enablePopupList = false; 
+        OnReceiveDownAndUpEvent += HandleUpOrDownInput;
+        OnReceiveEscapeEvent    += HandleEscapeInput;
+        OnReceiveBackQuotaEvent += HandleBackQuotaInput;
+        OnReceiveEnterEvent     += HandleSubmitInput;
+        OnReceiveDownAndUpEvent -= HandleUpOrDownPopupList;
+        OnReceiveEscapeEvent    -= HandleEscapePopupList;
+        OnReceiveBackQuotaEvent -= HandleBackQuotaPopupList;
+        OnReceiveEnterEvent     -= HandleSubmitPopupList;
     }
 
     void OnGUI() {
         if(!enable) return;
-        HandleSubmit();
-        HandleEscape();
-        HandleUpOrDown();
+        DispatchSubmitEvent();
+        DispatchEscapeEvent();
+        DispatchUpOrDownEvent();
+        DispatchBackQuotaEvent();
         HandleBackspace();
         GUI.SetNextControlName("input");
 
-        GUILayout.BeginArea(new Rect(0, (Screen.height - 50)*yPos, Screen.width, 50));
+        GUILayout.BeginArea(new Rect(0, (Screen.height - 50)*yPos, Screen.width, Screen.height));
         
         GUILayout.Label(prompt);
         String lastInput = input;
         input = GUILayout.TextField(input,GUILayout.Width(Screen.width));
+        if(enablePopupList) {
+            popupListScrollPos = GUILayout.BeginScrollView(popupListScrollPos, false, false, GUILayout.MaxHeight(250));
+            popupListSelected = GUILayout.SelectionGrid(popupListSelected, popupListContent, 1, style, GUILayout.Width(Screen.width));
+            GUILayout.EndScrollView();
+        }
         GUILayout.EndArea();
-        if (lastInput != input ) 
+        if (lastInput != input )
         {
-            HandleAutoCompletion();
+            ShouldOpemPopupList();
+            //HandleAutoCompletion();
         }
         HandleTab();
 
@@ -279,5 +430,6 @@ public class JumpCommandGUI : MonoBehaviour {
             focus = false;
             input = "";
         }
+
     }
 }

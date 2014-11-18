@@ -21,6 +21,30 @@ public class JumpCommandObject  {
         Help    = help;
     }
 
+    public override string ToString() {
+        string parminfo = ParametersInfo();
+        if(parminfo!="") {
+            parminfo =  parminfo;
+        }
+        string helpinfo = Help;
+        if(helpinfo != "") {
+            helpinfo = "\"" + helpinfo + "\"";
+        }
+        return string.Format("{0,-10}{1} {2}", Command, parminfo, helpinfo);
+    }
+
+    public string ParametersInfo() {
+        string result = "";
+        var paramInfoLst = Method.GetParameters();
+        for (int i = 0; i < paramInfoLst.Length-1; ++i) {
+            result += paramInfoLst[i].ParameterType.Name + " ";
+        }
+        if(paramInfoLst.Length > 0) {
+            result += paramInfoLst[paramInfoLst.Length-1].ParameterType.Name;
+        }
+        return result;
+    }
+
 
     public bool Call(string[] paramStr, Object callee = null) {        
         // create parameter list

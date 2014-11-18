@@ -71,6 +71,18 @@ static public class JumpCommand {
         FirstHistoryIndex = -1;
     }
 
+    static public List<string> GetAutoCompletionCommands(string command) {
+        List<string> result = new List<string>();
+
+        // Go through and get all commands start with input command
+        foreach(string key in mCmdLst.Keys) {
+            if (key.ToUpper().StartsWith(command.ToUpper())) {
+                result.Add(mCmdLst[key].ToString());
+            }
+        }
+        return result;
+    }
+
     static public string GetAutoCompletionCommand(string command, string fullCommand = "") {
         List<string> result = new List<string>();
 
