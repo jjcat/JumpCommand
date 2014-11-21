@@ -115,7 +115,7 @@ public class JumpCommandGUI : MonoBehaviour {
 
     static private string GetGameObjectFullName(GameObject go) {
         if(go == null) {
-            return "";
+            return "/";
         }
 
         StringBuilder sb = new StringBuilder(128);
@@ -130,20 +130,12 @@ public class JumpCommandGUI : MonoBehaviour {
         for(int i = parents.Count-1; i >= 0; i--) {
             sb.Append("/" + parents[i].name);    
         }
-        return sb.ToString();
+        return sb.ToString()+"/";
     }
 
     // update callee name that will invoke the command
     private void UpdatePrompt() {
-        if(JumpCommand.Callee == null) {
-            promptInfo = ">";       
-        }
-        else if(JumpCommand.Callee is GameObject){
-            promptInfo = GetGameObjectFullName(JumpCommand.Callee as GameObject) + ">";
-        }
-        else {  // if Callee is not type of GameObject, let it empty now.
-            promptInfo = ">";
-        }
+        promptInfo = GetGameObjectFullName(JumpCommand.Callee as GameObject) + ">";
     }
 
     private void HandleEscapeInput() {
@@ -151,7 +143,7 @@ public class JumpCommandGUI : MonoBehaviour {
         if(input != "") {
             input = "";
         }
-        // if input text not contains anything, close the console.
+        // if input text not contains anything, close console.
         else {
             OnCloseConsoleAction();
         }
@@ -315,6 +307,21 @@ public class JumpCommandGUI : MonoBehaviour {
 
     [JumpCommandRegister("cd", "Change game object")]
     static private void ChangeGameObjectCallee(string gameObjectPath = "") {
+        if(gameObjectPath == "~" || gameObjectPath == "") {  // go to current selected game object
+            JumpCommand.SetCallee(Selection.activeGameObject);
+        }
+        else if(gameObjectPath == "/") {  // go to root, always null
+            JumpCommand.SetCallee(null);
+        }
+        else {
+            string[] paths = gameObjectPath.Split(new char[]{'/'});
+            foreach(var p in paths) {
+                ChangeGameObjectCalleeInner(p);
+            }            
+        }
+    }
+
+    static private void ChangeGameObjectCalleeInner(string gameObjectPath = "") {
         if(gameObjectPath == "..") {  // return to parent game object
             if(JumpCommand.Callee is GameObject) {
                 var go = JumpCommand.Callee as GameObject;
@@ -333,7 +340,7 @@ public class JumpCommandGUI : MonoBehaviour {
             JumpCommand.SetCallee(null);
         }
         else {
-            string fullGameObjectPath = GetGameObjectFullName(JumpCommand.Callee as GameObject) +"/"+ gameObjectPath;
+            string fullGameObjectPath = GetGameObjectFullName(JumpCommand.Callee as GameObject) + gameObjectPath;
             var foundOne = GameObject.Find(fullGameObjectPath);
             if(foundOne != null) {
                 JumpCommand.SetCallee(foundOne);
@@ -485,6 +492,38 @@ public class JumpCommandGUI : MonoBehaviour {
             return JumpCommand.ParseArguments(input).Length;
         }
     }
+
+
+    string[] GetAllGameObjectFullName(GameObject parent) {
+        List<string> result = new List<string>();
+        var parentPath = GetGameObjectFullName(parent);
+        if(parent == null) {
+            foreach (GameObject go in UnityEngine.Object.FindObjectsOfType(typeof(GameObject))) {
+                if (go.transform.parent == null) {
+                    var path = GetGameObjectFullName(go);
+                    path.Substring(1);
+                    result.Add(path);
+                }
+            }
+        }
+        else {
+            for(int i = 0; i < parent.transform.childCount; i++) {
+                var path = GetGameObjectFullName(parent.transform.GetChild(i).gameObject);
+                path = path.Substring(parentPath.Length); 
+                result.Add(path);
+            }            
+        }
+        return result.ToArray();
+    }
+
+    // void OpenPopupListForGameObject() {
+    //     isPopupListOpen = true;
+    //     popupListContent = GetAllGameObjectFullName(JumpCommand.Callee as GameObject);
+    // }
+
+    // void ClosePopupListForGameObject() {
+    //     isPopupListOpen = false;
+    // }
 
     // string InputStatCurrentParameter {
     //     get {
