@@ -23,6 +23,7 @@ public class JumpCommandGUI : MonoBehaviour {
     string[] popupListContent;
     int    popupListSelPos = 0;
     Vector2 popupListScrollPos = Vector2.zero;
+    bool   popupListDisplayUp = true;
 
     event  Action<string> OnReceiveDownAndUpEvent;
     event  Action         OnReceiveEnterEvent;
@@ -244,6 +245,16 @@ public class JumpCommandGUI : MonoBehaviour {
             te.selectPos = te.pos;
             ClosePopupList();
         }
+        else if(KeyDown("tab") && !isPopupListOpen){
+            List<string> autoCompletions = JumpCommand.GetAutoCompletionCommands(input);
+            if(autoCompletions.Count > 0 ) {
+                popupListContent = autoCompletions.ToArray();
+                input = popupListContent[popupListSelPos].Split(new char[1]{' '})[0];
+                te.pos = input.Length;
+                te.selectPos = te.pos;
+                OpenPopupList();
+            }        
+        }
         // Press tab to switch among auto-completion commands
 
         // if (KeyDown("tab"))
@@ -408,6 +419,13 @@ public class JumpCommandGUI : MonoBehaviour {
         OnReceiveEscapeEvent    -= HandleEscapePopupList;
         OnReceiveBackQuotaEvent -= HandleBackQuotaPopupList;
         OnReceiveEnterEvent     -= HandleSubmitPopupList;
+        popupListSelPos = 0;
+    }
+
+    void DrawPopupList() {
+        popupListScrollPos = GUILayout.BeginScrollView(popupListScrollPos, false, false, GUILayout.MaxHeight(250));
+        popupListSelPos = GUILayout.SelectionGrid(popupListSelPos, popupListContent, 1, style, GUILayout.Width(Screen.width));
+        GUILayout.EndScrollView();        
     }
 
     void OnGUI() {
@@ -417,26 +435,33 @@ public class JumpCommandGUI : MonoBehaviour {
         DispatchUpOrDownEvent();
         DispatchBackQuotaEvent();
         HandleBackspace();
-        GUI.SetNextControlName("input");
 
         GUILayout.BeginArea(new Rect(0, (Screen.height - 50)*yPos, Screen.width, Screen.height));
-        
+
+        // display popup list if open        
+        GUI.SetNextControlName("input");
         GUILayout.Label(promptInfo);
         String lastInput = input;
         input = GUILayout.TextField(input,GUILayout.Width(Screen.width));
-        if(isPopupListOpen) {
-            popupListScrollPos = GUILayout.BeginScrollView(popupListScrollPos, false, false, GUILayout.MaxHeight(250));
-            popupListSelPos = GUILayout.SelectionGrid(popupListSelPos, popupListContent, 1, style, GUILayout.Width(Screen.width));
-            GUILayout.EndScrollView();
+
+        // display popup list if open
+        if(isPopupListOpen && popupListDisplayUp ) {
+            DrawPopupList();
         }
+        
         GUILayout.Label("Parameter Num " + InputStatParameterCount.ToString());
         GUILayout.EndArea();
-        if (lastInput != input && !pressBackspace)
-        {
+
+
+        if (lastInput != input && !pressBackspace) {
             ShouldOpemPopupList();
             //HandleAutoCompletion();
         }
         HandleTab();
+
+        //remove later 
+        GUILayout.Label("Current Foucs " + GUI.GetNameOfFocusedControl());
+
 
         if (focus) {
             GUI.FocusControl("input");
