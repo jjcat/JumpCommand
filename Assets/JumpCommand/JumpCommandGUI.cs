@@ -90,8 +90,8 @@ public class JumpCommandGUI : MonoBehaviour {
         try {
             JumpCommand.Execute(input);
         }
-        catch {
-          Debug.LogError("Execute Failed");
+        catch (Exception e){
+          Debug.LogError("Execute Failed" + e.ToString());
           return;
         }
     }

@@ -62,7 +62,17 @@ public class JumpCommandObject  {
                 }
             }
             else {
-                paramLst[i] = TypeDescriptor.GetConverter(paramInfoLst[i].ParameterType).ConvertFrom(paramStr[i]);
+                if(paramInfoLst[i].ParameterType == typeof(Vector3)) {
+                    var conver = new Vector3Converter();
+                    paramLst[i] = conver.ConvertFrom(paramStr[i]);
+                }
+                else if(paramInfoLst[i].ParameterType == typeof(Vector2)) {
+                    var conver = new Vector2Converter();
+                    paramLst[i] = conver.ConvertFrom(paramStr[i]);                    
+                }
+                else {
+                    paramLst[i] = TypeDescriptor.GetConverter(paramInfoLst[i].ParameterType).ConvertFrom(paramStr[i]);
+                }
             }
         }
 

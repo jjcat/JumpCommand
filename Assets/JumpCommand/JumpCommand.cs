@@ -4,6 +4,77 @@ using System.Collections.Generic;
 using System.Reflection;
 using Object = System.Object;
 using Debug = UnityEngine.Debug;
+using System.ComponentModel;
+
+
+public class Vector3Converter : TypeConverter {
+    // must implement functions CanConvertFrom¡¢CanConvertTo¡¢ConvertFrom and ConvertTo.
+    public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+    {
+        if (sourceType == typeof(string)) { 
+            return true;
+        }
+        return base.CanConvertFrom(context, sourceType);
+    }
+
+    public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+    {
+        return base.CanConvertTo(context, destinationType);
+    }
+
+    public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+    {
+        if (value is string) {
+            string tmp =(string) value;
+            string[] point = tmp.Split(',');
+            float x = Convert.ToSingle(point[0]);
+            float y = Convert.ToSingle(point[1]);
+            float z = Convert.ToSingle(point[2]);
+            return new Vector3(x, y, z);
+        }
+        return base.ConvertFrom(context, culture, value);
+    }
+
+    public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+    {
+        return base.ConvertTo(context, culture, value, destinationType);
+    }
+}
+
+public class Vector2Converter : TypeConverter {
+    // must implement functions CanConvertFrom¡¢CanConvertTo¡¢ConvertFrom and ConvertTo.
+    public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+    {
+        if (sourceType == typeof(string)) { 
+            return true;
+        }
+        return base.CanConvertFrom(context, sourceType);
+    }
+
+    public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+    {
+        return base.CanConvertTo(context, destinationType);
+    }
+
+    public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+    {
+        if (value is string) {
+            string tmp =(string) value;
+            string[] point = tmp.Split(',');
+            float x = Convert.ToSingle(point[0]);
+            float y = Convert.ToSingle(point[1]);
+            return new Vector3(x, y);
+        }
+        return base.ConvertFrom(context, culture, value);
+    }
+
+    public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+    {
+        return base.ConvertTo(context, culture, value, destinationType);
+    }
+}
+
+
 
 static public class JumpCommand {
     static private  Dictionary<string, JumpCommandObject> mCmdLst = new Dictionary<string, JumpCommandObject>();
@@ -179,6 +250,6 @@ static public class JumpCommand {
                 OnChangeCallee(Callee);
             }
         }
-    }    
+    }
 }
 
