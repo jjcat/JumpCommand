@@ -100,12 +100,13 @@ static public class JumpCommand {
                     if(a.GetType() == typeof(JumpCommandRegister)) {
                         string commandName = (a as JumpCommandRegister).command;
                         string help        = (a as JumpCommandRegister).help;
+                        string gameObject  = (a as JumpCommandRegister).gameObjName;
                         if(mCmdLst.ContainsKey(commandName)) {
                             Debug.LogError(string.Format("Can not register function {0} as command \"{1}\", \"{1}\" is already used by {2}.{3}", 
                                 m.Name, commandName, mCmdLst[commandName].Type.Name, mCmdLst[commandName].Method.Name));
                         }
                         else {
-                            mCmdLst.Add(commandName, new JumpCommandObject(commandName, m, help));
+                            mCmdLst.Add(commandName, new JumpCommandObject(commandName, m, help, gameObject));
                         }
                     }
                 }
@@ -187,7 +188,7 @@ static public class JumpCommand {
         AddHistory(command);
         string[] argv = ParseArguments(command);
         if (argv.Length == 0) {
-            Debug.LogError("Command is empty");
+            //Debug.LogError("Command is empty");
             return; 
         }
         if (mCmdLst.ContainsKey(argv[0])) {
@@ -195,7 +196,12 @@ static public class JumpCommand {
             string[] paramStr = new string[argv.Length - 1];
             Array.Copy(argv,1,paramStr,0,argv.Length-1);
             if(!mCmdLst[argv[0]].Method.IsStatic) {  // the callee will be the current select game object
-                if(Callee is GameObject) {
+                if(mCmdLst[argv[0]].GameObject != "") {
+                    GameObject go = GameObject.Find(mCmdLst[argv[0]].GameObject) as GameObject;
+                    var component = go.GetComponent(mCmdLst[argv[0]].Type);
+                    cmd.Call(paramStr, component);
+                }
+                else if(Callee is GameObject) {
                     var go = Callee as GameObject;
                     var component = go.GetComponent(mCmdLst[argv[0]].Type);
                     cmd.Call(paramStr, component);

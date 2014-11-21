@@ -6,19 +6,21 @@ using Object = System.Object;
 
 
 public class JumpCommandObject  {
-    public string      Command {get;private set;}
-    public MethodInfo  Method  {get;private set;}
-    public string      Help    {get;private set;}
+    public string      Command    {get;private set;}
+    public MethodInfo  Method     {get;private set;}
+    public string      Help       {get;private set;}
+    public string      GameObject {get;private set;}
     public Type Type {
         get {
             return Method.DeclaringType;
         }
     }
 
-    public JumpCommandObject(string command, MethodInfo method, string help) {
-        Command = command;
-        Method  = method;
-        Help    = help;
+    public JumpCommandObject(string command, MethodInfo method, string help, string gameObject) {
+        Command    = command;
+        Method     = method;
+        Help       = help;
+        GameObject = gameObject;
     }
 
     public override string ToString() {
