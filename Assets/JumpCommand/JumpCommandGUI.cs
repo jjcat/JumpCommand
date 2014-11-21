@@ -147,7 +147,14 @@ public class JumpCommandGUI : MonoBehaviour {
     }
 
     private void HandleEscapeInput() {
-        OnCloseConsoleAction();
+        // if input text contains contents, just clean off all
+        if(input != "") {
+            input = "";
+        }
+        // if input text not contains anything, close the console.
+        else {
+            OnCloseConsoleAction();
+        }
     }
 
     private void HandleBackQuotaInput() {
@@ -462,13 +469,15 @@ public class JumpCommandGUI : MonoBehaviour {
         //remove later 
         GUILayout.Label("Current Foucs " + GUI.GetNameOfFocusedControl());
 
-
         if (focus) {
             GUI.FocusControl("input");
             focus = false;
             input = "";
         }
 
+        if(input == "" && isPopupListOpen && pressBackspace) {
+            ClosePopupList();
+        }
     }
 
     int InputStatParameterCount {
