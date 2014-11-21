@@ -313,6 +313,15 @@ public class JumpCommandGUI : MonoBehaviour {
         else if(gameObjectPath == "/") {  // go to root, always null
             JumpCommand.SetCallee(null);
         }
+        else if(gameObjectPath.StartsWith("/")) { // use absolut path
+            var foundOne = GameObject.Find(gameObjectPath);
+            if(foundOne != null) {
+                JumpCommand.SetCallee(foundOne);
+            }
+            else {
+                Debug.LogError("Can not found " + gameObjectPath);
+            }
+        }
         else {
             string[] paths = gameObjectPath.Split(new char[]{'/'});
             foreach(var p in paths) {
