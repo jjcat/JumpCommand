@@ -15,11 +15,12 @@ public class JumpCommandGUI : MonoBehaviour {
     bool   focus        = false;
     int    historyIndex = -1; // -1 means current input
     int    cursorPos    = -1;
+    bool   pressBackspace = false;
     string prompt       = "";
     [HideInInspector]
     GUIStyle style = new GUIStyle();  // popup list style
     bool   enablePopupList = false;
-    string[] popupListContent = {"1","2","3","4"};
+    string[] popupListContent;
     int    popupListSelected = 0;
     Vector2 popupListScrollPos = Vector2.zero;
 
@@ -70,7 +71,10 @@ public class JumpCommandGUI : MonoBehaviour {
     }
 
     private void HandleSubmitPopupList() {
+        TextEditor te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
         input = popupListContent[popupListSelected].Split(new char[1]{' '})[0];
+        te.pos = input.Length;
+        te.selectPos = te.pos;
         ClosePopupList();         
     }
 
@@ -159,7 +163,9 @@ public class JumpCommandGUI : MonoBehaviour {
 
     // fix cursorPos is not correct if pressing backspace.
     private void HandleBackspace() {
-        if(KeyDown("backspace")) {    
+        pressBackspace = false;
+        if(KeyDown("backspace")) {  
+            pressBackspace = true;  
             cursorPos = input.Length;
         }
     }
@@ -232,19 +238,25 @@ public class JumpCommandGUI : MonoBehaviour {
     private void HandleTab()
     {
         TextEditor te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
-
-        // Press tab to switch among auto-completion commands
-        if (KeyDown("tab"))
-        {
-            // eg: com[mand]
-            // The unselected part of a command
-            string substr  = input.Substring(0, te.pos);
-            string command = JumpCommand.GetAutoCompletionCommand(substr, input);
-            if(command != null) {
-                input = command;
-                te.selectPos = input.Length;
-            }
+        if(KeyDown("tab") && enablePopupList) {
+            input = popupListContent[popupListSelected].Split(new char[1]{' '})[0];
+            te.pos = input.Length;
+            te.selectPos = te.pos;
+            ClosePopupList();
         }
+        // Press tab to switch among auto-completion commands
+
+        // if (KeyDown("tab"))
+        // {
+        //     // eg: com[mand]
+        //     // The unselected part of a command
+        //     string substr  = input.Substring(0, te.pos);
+        //     string command = JumpCommand.GetAutoCompletionCommand(substr, input);
+        //     if(command != null) {
+        //         input = command;
+        //         te.pos = input.Length;
+        //     }
+        // }
     }
 
 
@@ -417,8 +429,9 @@ public class JumpCommandGUI : MonoBehaviour {
             popupListSelected = GUILayout.SelectionGrid(popupListSelected, popupListContent, 1, style, GUILayout.Width(Screen.width));
             GUILayout.EndScrollView();
         }
+        GUILayout.Label("Parameter Num " + InputStatParameterCount.ToString());
         GUILayout.EndArea();
-        if (lastInput != input )
+        if (lastInput != input && !pressBackspace)
         {
             ShouldOpemPopupList();
             //HandleAutoCompletion();
@@ -432,4 +445,16 @@ public class JumpCommandGUI : MonoBehaviour {
         }
 
     }
+
+    int InputStatParameterCount {
+        get {
+            return JumpCommand.ParseArguments(input).Length;
+        }
+    }
+
+    // string InputStatCurrentParameter {
+    //     get {
+
+    //     }
+    // }
 }
