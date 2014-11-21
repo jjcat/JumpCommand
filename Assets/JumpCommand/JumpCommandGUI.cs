@@ -16,12 +16,12 @@ public class JumpCommandGUI : MonoBehaviour {
     int    historyIndex = -1; // -1 means current input
     int    cursorPos    = -1;
     bool   pressBackspace = false;
-    string prompt       = "";
+    string promptInfo       = "";
     [HideInInspector]
     GUIStyle style = new GUIStyle();  // popup list style
-    bool   enablePopupList = false;
+    bool   isPopupListOpen = false;
     string[] popupListContent;
-    int    popupListSelected = 0;
+    int    popupListSelPos = 0;
     Vector2 popupListScrollPos = Vector2.zero;
 
     event  Action<string> OnReceiveDownAndUpEvent;
@@ -72,7 +72,7 @@ public class JumpCommandGUI : MonoBehaviour {
 
     private void HandleSubmitPopupList() {
         TextEditor te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
-        input = popupListContent[popupListSelected].Split(new char[1]{' '})[0];
+        input = popupListContent[popupListSelPos].Split(new char[1]{' '})[0];
         te.pos = input.Length;
         te.selectPos = te.pos;
         ClosePopupList();         
@@ -135,13 +135,13 @@ public class JumpCommandGUI : MonoBehaviour {
     // update callee name that will invoke the command
     private void UpdatePrompt() {
         if(JumpCommand.Callee == null) {
-            prompt = ">";       
+            promptInfo = ">";       
         }
         else if(JumpCommand.Callee is GameObject){
-            prompt = GetGameObjectFullName(JumpCommand.Callee as GameObject) + ">";
+            promptInfo = GetGameObjectFullName(JumpCommand.Callee as GameObject) + ">";
         }
         else {  // if Callee is not type of GameObject, let it empty now.
-            prompt = ">";
+            promptInfo = ">";
         }
     }
 
@@ -176,7 +176,7 @@ public class JumpCommandGUI : MonoBehaviour {
             step = 1;
         }
 
-        popupListSelected = Mathf.Clamp(popupListSelected + step, 0, popupListContent.Length-1);
+        popupListSelPos = Mathf.Clamp(popupListSelPos + step, 0, popupListContent.Length-1);
     }
 
     private void HandleUpOrDownInput(string key) {
@@ -238,8 +238,8 @@ public class JumpCommandGUI : MonoBehaviour {
     private void HandleTab()
     {
         TextEditor te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
-        if(KeyDown("tab") && enablePopupList) {
-            input = popupListContent[popupListSelected].Split(new char[1]{' '})[0];
+        if(KeyDown("tab") && isPopupListOpen) {
+            input = popupListContent[popupListSelPos].Split(new char[1]{' '})[0];
             te.pos = input.Length;
             te.selectPos = te.pos;
             ClosePopupList();
@@ -264,12 +264,12 @@ public class JumpCommandGUI : MonoBehaviour {
         List<string> autoCompletions = JumpCommand.GetAutoCompletionCommands(input);
         if(autoCompletions.Count > 0 ) {
             popupListContent = autoCompletions.ToArray();
-            if(!enablePopupList) {
+            if(!isPopupListOpen) {
                 OpenPopupList();
             }
         }        
         else {
-            if(enablePopupList) {
+            if(isPopupListOpen) {
                 ClosePopupList();
             }
         }
@@ -378,7 +378,7 @@ public class JumpCommandGUI : MonoBehaviour {
         historyIndex = -1;
         UpdatePrompt();
         lastSelection = null;
-        enablePopupList = false;
+        isPopupListOpen = false;
         OnReceiveDownAndUpEvent += HandleUpOrDownInput;
         OnReceiveEnterEvent     += HandleSubmitInput;
         OnReceiveEscapeEvent    += HandleEscapeInput;
@@ -386,7 +386,7 @@ public class JumpCommandGUI : MonoBehaviour {
     }
 
     void OpenPopupList() {  
-        enablePopupList = true;
+        isPopupListOpen = true;
         OnReceiveDownAndUpEvent -= HandleUpOrDownInput;
         OnReceiveEscapeEvent    -= HandleEscapeInput;
         OnReceiveBackQuotaEvent -= HandleBackQuotaInput;
@@ -395,11 +395,11 @@ public class JumpCommandGUI : MonoBehaviour {
         OnReceiveEscapeEvent    += HandleEscapePopupList;
         OnReceiveBackQuotaEvent += HandleBackQuotaPopupList;
         OnReceiveEnterEvent     += HandleSubmitPopupList;
-        popupListSelected = 0;
+        popupListSelPos = 0;
     }
 
     void ClosePopupList() {
-        enablePopupList = false; 
+        isPopupListOpen = false; 
         OnReceiveDownAndUpEvent += HandleUpOrDownInput;
         OnReceiveEscapeEvent    += HandleEscapeInput;
         OnReceiveBackQuotaEvent += HandleBackQuotaInput;
@@ -421,12 +421,12 @@ public class JumpCommandGUI : MonoBehaviour {
 
         GUILayout.BeginArea(new Rect(0, (Screen.height - 50)*yPos, Screen.width, Screen.height));
         
-        GUILayout.Label(prompt);
+        GUILayout.Label(promptInfo);
         String lastInput = input;
         input = GUILayout.TextField(input,GUILayout.Width(Screen.width));
-        if(enablePopupList) {
+        if(isPopupListOpen) {
             popupListScrollPos = GUILayout.BeginScrollView(popupListScrollPos, false, false, GUILayout.MaxHeight(250));
-            popupListSelected = GUILayout.SelectionGrid(popupListSelected, popupListContent, 1, style, GUILayout.Width(Screen.width));
+            popupListSelPos = GUILayout.SelectionGrid(popupListSelPos, popupListContent, 1, style, GUILayout.Width(Screen.width));
             GUILayout.EndScrollView();
         }
         GUILayout.Label("Parameter Num " + InputStatParameterCount.ToString());
