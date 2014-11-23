@@ -451,6 +451,26 @@ public class JumpCommandGUI : MonoBehaviour {
         GUILayout.EndScrollView();        
     }
 
+    void HandleDragExited() {
+        Event currentEvent = Event.current;
+        var rect = new Rect(0, Screen.height, Screen.width, Screen.height);
+        if(currentEvent.type == EventType.DragExited ) {
+            if(DragAndDrop.objectReferences.Length == 1) {
+                GameObject dragObj = DragAndDrop.objectReferences[0] as GameObject;
+                if(dragObj != null) {
+                    string path = "\"" + GetGameObjectFullName(dragObj) + "\"";
+                    TextEditor te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
+                    if (te != null) {
+                        te.DeleteSelection();
+                        input = input.Insert(te.pos, path);
+                        te.pos = te.selectPos = te.pos + path.Length;
+                    }
+
+                }
+            }
+        }        
+    }
+
     void OnGUI() {
         if(!enable) return;
         DispatchSubmitEvent();
@@ -458,6 +478,7 @@ public class JumpCommandGUI : MonoBehaviour {
         DispatchUpOrDownEvent();
         DispatchBackQuotaEvent();
         HandleBackspace();
+        HandleDragExited();
 
         GUILayout.BeginArea(new Rect(0, (Screen.height - 50)*yPos, Screen.width, Screen.height));
 
@@ -472,7 +493,7 @@ public class JumpCommandGUI : MonoBehaviour {
             DrawPopupList();
         }
         
-        GUILayout.Label("Parameter Num " + InputStatParameterCount.ToString());
+        //GUILayout.Label("Parameter Num " + InputStatParameterCount.ToString());
         GUILayout.EndArea();
 
 
