@@ -8,7 +8,7 @@ using System.ComponentModel;
 
 
 static public class JumpCommand {
-    static private  Dictionary<string, JumpCommandObject> mCmdLst = new Dictionary<string, JumpCommandObject>();
+    static private  Dictionary<string, List<JumpCommandObject>> mCmdLst = new Dictionary<string, List<JumpCommandObject>>();
     static public   Object       Callee {get;private set;}
     static private  List<string> History = new List<string>();
     static public   HashSet<Type>   ComponentTypes = new HashSet<Type>();
@@ -50,11 +50,14 @@ static public class JumpCommand {
                         string help        = (a as JumpCommandRegister).help;
                         string gameObject  = (a as JumpCommandRegister).gameObjFullName;
                         if(mCmdLst.ContainsKey(commandName)) {
-                            Debug.LogError(string.Format("Can not register function {0} as command \"{1}\", \"{1}\" is already used by {2}.{3}", 
-                                m.Name, commandName, mCmdLst[commandName].Type.Name, mCmdLst[commandName].Method.Name));
+                            mCmdLst[commandName].Add(new JumpCommandObject(commandName, m, help, gameObject));                            
+                            // Debug.LogError(string.Format("Can not register function {0} as command \"{1}\", \"{1}\" is already used by {2}.{3}", 
+                            //     m.Name, commandName, mCmdLst[commandName].Type.Name, mCmdLst[commandName].Method.Name));
                         }
                         else {
-                            mCmdLst.Add(commandName, new JumpCommandObject(commandName, m, help, gameObject));
+                            var commandList = new List<JumpCommandObject>();
+                            commandList.Add(new JumpCommandObject(commandName, m, help, gameObject));
+                            mCmdLst.Add(commandName, commandList);
                         }
                     }
                 }
@@ -97,7 +100,9 @@ static public class JumpCommand {
         // Go through and get all commands start with input command
         foreach(string key in mCmdLst.Keys) {
             if (key.ToUpper().StartsWith(command.ToUpper())) {
-                result.Add(mCmdLst[key].ToString());
+                foreach(var cmd in mCmdLst[key]) {
+                    result.Add(cmd.ToString());
+                }
             }
         }
         return result;
@@ -135,30 +140,42 @@ static public class JumpCommand {
         AddHistory(command);
         string[] argv = ParseArguments(command);
         if (argv.Length == 0) {
-            //Debug.LogError("Command is empty");
             return; 
         }
         if (mCmdLst.ContainsKey(argv[0])) {
-            JumpCommandObject cmd = mCmdLst[argv[0]];
-            string[] paramStr = new string[argv.Length - 1];
-            Array.Copy(argv,1,paramStr,0,argv.Length-1);
-            if(!mCmdLst[argv[0]].Method.IsStatic) {  // the callee will be the current select game object
-                if(mCmdLst[argv[0]].GameObjFullName != "") {
-                    GameObject go = GameObject.Find(mCmdLst[argv[0]].GameObjFullName) as GameObject;
-                    var component = go.GetComponent(mCmdLst[argv[0]].Type);
-                    cmd.Call(paramStr, component);
+            bool success  = true;
+            foreach(var cmd in mCmdLst[argv[0]]) {
+                try {
+                    success = true;
+                    string[] paramStr = new string[argv.Length - 1];
+                    Array.Copy(argv,1,paramStr,0,argv.Length-1);
+                    if(!cmd.Method.IsStatic) {  // the callee will be the current select game object
+                        if(cmd.GameObjFullName != "") {
+                            GameObject go = GameObject.Find(cmd.GameObjFullName) as GameObject;
+                            var component = go.GetComponent(cmd.Type);
+                            cmd.Call(paramStr, component);
+                        }
+                        else if(Callee is GameObject) {
+                            var go = Callee as GameObject;
+                            var component = go.GetComponent(cmd.Type);
+                            cmd.Call(paramStr, component);
+                        }
+                        else {
+                            cmd.Call(paramStr, Callee);
+                        }
+                    }
+                    else {
+                        cmd.Call(paramStr, Callee);
+                    }                    
+                } catch {
+                    success  = false;
                 }
-                else if(Callee is GameObject) {
-                    var go = Callee as GameObject;
-                    var component = go.GetComponent(mCmdLst[argv[0]].Type);
-                    cmd.Call(paramStr, component);
-                }
-                else {
-                    cmd.Call(paramStr, Callee);
+                if(success ) { 
+                    break;                
                 }
             }
-            else {
-                cmd.Call(paramStr, Callee);
+            if(!success) {
+                throw new Exception("Executed failed");
             }
         }
         else {
@@ -187,8 +204,10 @@ static public class JumpCommand {
     [JumpCommandRegister("help","list all the command")]
     static private void OutputAllCommnd(string command="") {
         foreach(var c in mCmdLst.Values) {
-            if(!c.Command.ToUpper().StartsWith(command.ToUpper())) continue;
-            Debug.Log(c.ToString());
+            foreach(var cmd in c) {
+                if(!cmd.Command.ToUpper().StartsWith(command.ToUpper())) continue;
+                Debug.Log(cmd.ToString());                
+            }
         }        
     }
 
