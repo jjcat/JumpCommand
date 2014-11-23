@@ -3,11 +3,11 @@
 public class JumpCommandRegister : Attribute {
 	public string command;
 	public string help;
-	public string gameObjName;
+	public string gameObjFullName;
 
-	public JumpCommandRegister(string command, string help = "", string gameObjName = "") {
+	public JumpCommandRegister(string command, string help = "", string gameObjFullName = "") {
 		this.command     = command;
 		this.help        = help;
-		this.gameObjName = gameObjName;
+		this.gameObjFullName = gameObjFullName;
 	}
 }

@@ -6,76 +6,6 @@ using Object = System.Object;
 using Debug = UnityEngine.Debug;
 using System.ComponentModel;
 
-
-public class Vector3Converter : TypeConverter {
-    // must implement functions CanConvertFrom¡¢CanConvertTo¡¢ConvertFrom and ConvertTo.
-    public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
-    {
-        if (sourceType == typeof(string)) { 
-            return true;
-        }
-        return base.CanConvertFrom(context, sourceType);
-    }
-
-    public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
-    {
-        return base.CanConvertTo(context, destinationType);
-    }
-
-    public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
-    {
-        if (value is string) {
-            string tmp =(string) value;
-            string[] point = tmp.Split(',');
-            float x = Convert.ToSingle(point[0]);
-            float y = Convert.ToSingle(point[1]);
-            float z = Convert.ToSingle(point[2]);
-            return new Vector3(x, y, z);
-        }
-        return base.ConvertFrom(context, culture, value);
-    }
-
-    public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
-    {
-        return base.ConvertTo(context, culture, value, destinationType);
-    }
-}
-
-public class Vector2Converter : TypeConverter {
-    // must implement functions CanConvertFrom¡¢CanConvertTo¡¢ConvertFrom and ConvertTo.
-    public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
-    {
-        if (sourceType == typeof(string)) { 
-            return true;
-        }
-        return base.CanConvertFrom(context, sourceType);
-    }
-
-    public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
-    {
-        return base.CanConvertTo(context, destinationType);
-    }
-
-    public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
-    {
-        if (value is string) {
-            string tmp =(string) value;
-            string[] point = tmp.Split(',');
-            float x = Convert.ToSingle(point[0]);
-            float y = Convert.ToSingle(point[1]);
-            return new Vector3(x, y);
-        }
-        return base.ConvertFrom(context, culture, value);
-    }
-
-    public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
-    {
-        return base.ConvertTo(context, culture, value, destinationType);
-    }
-}
-
-
-
 static public class JumpCommand {
     static private  Dictionary<string, JumpCommandObject> mCmdLst = new Dictionary<string, JumpCommandObject>();
     static public   Object       Callee {get;private set;}
@@ -116,7 +46,7 @@ static public class JumpCommand {
                     if(a.GetType() == typeof(JumpCommandRegister)) {
                         string commandName = (a as JumpCommandRegister).command;
                         string help        = (a as JumpCommandRegister).help;
-                        string gameObject  = (a as JumpCommandRegister).gameObjName;
+                        string gameObject  = (a as JumpCommandRegister).gameObjFullName;
                         if(mCmdLst.ContainsKey(commandName)) {
                             Debug.LogError(string.Format("Can not register function {0} as command \"{1}\", \"{1}\" is already used by {2}.{3}", 
                                 m.Name, commandName, mCmdLst[commandName].Type.Name, mCmdLst[commandName].Method.Name));
@@ -196,7 +126,6 @@ static public class JumpCommand {
                 return result[0];
             }
         }
-
         return null;
     }
 
@@ -212,8 +141,8 @@ static public class JumpCommand {
             string[] paramStr = new string[argv.Length - 1];
             Array.Copy(argv,1,paramStr,0,argv.Length-1);
             if(!mCmdLst[argv[0]].Method.IsStatic) {  // the callee will be the current select game object
-                if(mCmdLst[argv[0]].GameObjName != "") {
-                    GameObject go = GameObject.Find(mCmdLst[argv[0]].GameObjName) as GameObject;
+                if(mCmdLst[argv[0]].GameObjFullName != "") {
+                    GameObject go = GameObject.Find(mCmdLst[argv[0]].GameObjFullName) as GameObject;
                     var component = go.GetComponent(mCmdLst[argv[0]].Type);
                     cmd.Call(paramStr, component);
                 }
@@ -254,14 +183,10 @@ static public class JumpCommand {
     }
 
     [JumpCommandRegister("help","list all the command")]
-    static private void OutputAllCommnd() {
+    static private void OutputAllCommnd(string command="") {
         foreach(var c in mCmdLst.Values) {
-            string paramInfo = "(";
-            foreach(var p in c.Method.GetParameters()) {
-                paramInfo += p.ParameterType.Name + ", ";
-            }
-            paramInfo += ")";
-            Debug.Log(string.Format("{0,-10} {1}: \"{2}\"", c.Command, paramInfo, c.Help));
+            if(!c.Command.ToUpper().StartsWith(command.ToUpper())) continue;
+            Debug.Log(c.ToString());
         }        
     }
 
@@ -273,5 +198,17 @@ static public class JumpCommand {
             }
         }
     }
+
+    // TODO, handle relative path
+    static public Object FindComponent(string gameObjFullName, Type type) {
+        GameObject foundOne = GameObject.Find(gameObjFullName);
+        if(foundOne != null) {
+            return foundOne.GetComponent(type);
+        }
+        else {
+            return null;
+        }
+    }
+
 }
 

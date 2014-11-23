@@ -9,14 +9,14 @@ using Object = System.Object;
 
 public class JumpCommandGUI : MonoBehaviour {
 
-    string input        = "";
-    string inputCopy    = "";
-    bool   enable       = false;
-    bool   focus        = false;
-    int    historyIndex = -1; // -1 means current input
-    int    cursorPos    = -1;
+    string input          = "";
+    string inputCopy      = "";
+    bool   enable         = false;
+    bool   focus          = false;
+    int    historyIndex   = -1; // -1 means current input
+    int    cursorPos      = -1;
     bool   pressBackspace = false;
-    string promptInfo       = "";
+    string promptInfo     = "";
     [HideInInspector]
     GUIStyle style = new GUIStyle();  // popup list style
     bool   isPopupListOpen = false;

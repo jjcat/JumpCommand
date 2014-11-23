@@ -9,7 +9,7 @@ public class JumpCommandObject  {
     public string      Command     {get;private set;}
     public MethodInfo  Method      {get;private set;}
     public string      Help        {get;private set;}
-    public string      GameObjName {get;private set;}
+    public string      GameObjFullName {get;private set;}
     public Type Type {
         get {
             return Method.DeclaringType;
@@ -20,7 +20,7 @@ public class JumpCommandObject  {
         Command     = command;
         Method      = method;
         Help        = help;
-        GameObjName = gameObject;
+        GameObjFullName = gameObject;
     }
 
     public override string ToString() {
@@ -35,7 +35,7 @@ public class JumpCommandObject  {
         return string.Format("{0,-10} {1} {2}", Command, parminfo, helpinfo);
     }
 
-    public string ParametersInfo() {
+    private string ParametersInfo() {
         string result = "";
         var paramInfoLst = Method.GetParameters();
         for (int i = 0; i < paramInfoLst.Length-1; ++i) {
@@ -64,28 +64,14 @@ public class JumpCommandObject  {
                 }
             }
             else {
-                if(paramInfoLst[i].ParameterType == typeof(Vector3)) {
-                    var conver = new Vector3Converter();
-                    paramLst[i] = conver.ConvertFrom(paramStr[i]);
+                if(paramInfoLst[i].ParameterType == typeof(Vector3)) {  
+                    paramLst[i] = ConvertVector3FromString(paramStr[i]);
                 }
                 else if(paramInfoLst[i].ParameterType == typeof(Vector2)) {
-                    var conver = new Vector2Converter();
-                    paramLst[i] = conver.ConvertFrom(paramStr[i]);                    
+                    paramLst[i] = ConvertVector2FromString(paramStr[i]);                    
                 }
                 else if( JumpCommand.ComponentTypes.Contains(paramInfoLst[i].ParameterType)) {  // try to parse component
-                    if(paramStr[i].StartsWith("/")) { // use absolut path
-                        GameObject foundOne = GameObject.Find(paramStr[i]);
-                        if(foundOne != null) {
-                            var component = foundOne.GetComponent(paramInfoLst[i].ParameterType);
-                            paramLst[i] = component;
-                        }
-                        else {
-                            Debug.LogError("Can not found " + paramStr[i]);
-                        }
-                    }
-                    else {
-                        Debug.LogError("Can not found " + paramStr[i]);                        
-                    }
+                    paramLst[i] = JumpCommand.FindComponent(paramStr[i], paramInfoLst[i].ParameterType);
                 }
                 else {
                     paramLst[i] = TypeDescriptor.GetConverter(paramInfoLst[i].ParameterType).ConvertFrom(paramStr[i]);
@@ -108,5 +94,32 @@ public class JumpCommandObject  {
         }
         return true;
     }
+
+    static public Vector2 ConvertVector2FromString(string value) {
+        try {
+            string tmp =(string) value;
+            string[] point = tmp.Split(',');
+            float x = Convert.ToSingle(point[0]);
+            float y = Convert.ToSingle(point[1]);
+            return new Vector2(x, y);            
+        } catch {
+            throw new Exception("Can not convert " + value + " to type Vector2");
+        }
+        
+    }
+
+    static public Vector3 ConvertVector3FromString(string value) {
+        try {
+            string tmp =(string) value;
+            string[] point = tmp.Split(',');
+            float x = Convert.ToSingle(point[0]);
+            float y = Convert.ToSingle(point[1]);
+            float z = Convert.ToSingle(point[2]);
+            return new Vector3(x, y, z);
+        } catch {
+            throw new Exception("Can not convert " +"\""+value+"\"" + " to type Vector3");      
+        }
+    }
+
 
 }
