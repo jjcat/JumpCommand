@@ -70,6 +70,9 @@ public class JumpCommandObject  {
                 else if(paramInfoLst[i].ParameterType == typeof(Vector2)) {
                     paramLst[i] = ConvertVector2FromString(paramStr[i]);                    
                 }
+                else if(paramInfoLst[i].ParameterType == typeof(Color)) {
+                    paramLst[i] = ConvertColorFromString(paramStr[i]);
+                }
                 else if( JumpCommand.ComponentTypes.Contains(paramInfoLst[i].ParameterType)) {  // try to parse component
                     paramLst[i] = JumpCommand.FindComponent(paramStr[i], paramInfoLst[i].ParameterType);
                 }
@@ -118,6 +121,19 @@ public class JumpCommandObject  {
             return new Vector3(x, y, z);
         } catch {
             throw new Exception("Can not convert " +"\""+value+"\"" + " to type Vector3");      
+        }
+    }
+
+    static public Color ConvertColorFromString(string value) {
+        try {
+            string tmp =(string) value;
+            string[] point = tmp.Split(',');
+            float x = Convert.ToSingle(point[0]);
+            float y = Convert.ToSingle(point[1]);
+            float z = Convert.ToSingle(point[2]);
+            return new Color(x, y, z);
+        } catch {
+            throw new Exception("Can not convert " +"\""+value+"\"" + " to type Color");      
         }
     }
 
