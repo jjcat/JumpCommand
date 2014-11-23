@@ -6,6 +6,7 @@ using Object = System.Object;
 using Debug = UnityEngine.Debug;
 using System.ComponentModel;
 
+
 static public class JumpCommand {
     static private  Dictionary<string, JumpCommandObject> mCmdLst = new Dictionary<string, JumpCommandObject>();
     static public   Object       Callee {get;private set;}
@@ -20,7 +21,7 @@ static public class JumpCommand {
         RegisterAllCommandObjects();
     }
 
-    static private bool IsBaseTypeMonoBehaviour(Type type) {
+    static private bool IsComponentType(Type type) {
         if(type.BaseType == null) {
             return false;
         }
@@ -28,17 +29,18 @@ static public class JumpCommand {
             return true;
         }
         else {
-            return IsBaseTypeMonoBehaviour(type.BaseType);
+            return IsComponentType(type.BaseType);
         }
     }
 
     static private void RegisterAllCommandObjects() {
         mCmdLst.Clear();
+        ComponentTypes.Clear();
         var csharpDLL = Assembly.GetExecutingAssembly();  // unity csharp.dll assembly
 
         // find all type in csharp.dll, if type's attributes contains JumpCommandRegister, then register the command.
         foreach( var t in csharpDLL.GetTypes()) {
-            if(IsBaseTypeMonoBehaviour(t)) {
+            if(IsComponentType(t)) {
                 ComponentTypes.Add(t);
             }
             foreach(var m in t.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)) {  
