@@ -25,6 +25,9 @@ public class JumpCommandGUI : MonoBehaviour {
     Vector2 popupListScrollPos = Vector2.zero;
     bool   popupListDisplayUp = true;
 
+    int    popupListItemHeight = 26;  // magic number
+    int    popupListItemNum    = 5;
+
     event  Action<string> OnReceiveDownAndUpEvent;
     event  Action         OnReceiveEnterEvent;
     event  Action         OnReceiveEscapeEvent;
@@ -177,6 +180,14 @@ public class JumpCommandGUI : MonoBehaviour {
         }
 
         popupListSelPos = Mathf.Clamp(popupListSelPos + step, 0, popupListContent.Length-1);
+        float start = popupListScrollPos.y;
+        float end   = popupListScrollPos.y + (popupListItemNum * popupListItemHeight);
+        if( (popupListSelPos * popupListItemHeight) < start && key == "up") {
+            popupListScrollPos = new Vector2(popupListScrollPos.x, Mathf.Clamp(popupListScrollPos.y-popupListItemHeight, 0, (popupListContent.Length-1)*popupListItemHeight ));
+        }
+        else if( (popupListSelPos * popupListItemHeight) > end && key == "down") {
+            popupListScrollPos = new Vector2(popupListScrollPos.x, Mathf.Clamp(popupListScrollPos.y+popupListItemHeight, 0, (popupListContent.Length-1)*popupListItemHeight ));
+        }
     }
 
     private void HandleUpOrDownInput(string key) {
@@ -446,7 +457,7 @@ public class JumpCommandGUI : MonoBehaviour {
     }
 
     void DrawPopupList() {
-        popupListScrollPos = GUILayout.BeginScrollView(popupListScrollPos, false, false, GUILayout.MaxHeight(250));
+        popupListScrollPos = GUILayout.BeginScrollView(popupListScrollPos, false, false, GUILayout.MaxHeight(popupListItemNum * popupListItemHeight));
         popupListSelPos = GUILayout.SelectionGrid(popupListSelPos, popupListContent, 1, style, GUILayout.Width(Screen.width));
         GUILayout.EndScrollView();        
     }
@@ -472,6 +483,7 @@ public class JumpCommandGUI : MonoBehaviour {
     }
 
     void OnGUI() {
+        GUILayout.Label("Scroll: " + popupListScrollPos);
         if(!enable) return;
         DispatchSubmitEvent();
         DispatchEscapeEvent();
@@ -504,7 +516,7 @@ public class JumpCommandGUI : MonoBehaviour {
         HandleTab();
 
         //remove later 
-        GUILayout.Label("Current Foucs " + GUI.GetNameOfFocusedControl());
+        //GUILayout.Label("Current Foucs " + GUI.GetNameOfFocusedControl());
 
         if (focus) {
             GUI.FocusControl("input");
