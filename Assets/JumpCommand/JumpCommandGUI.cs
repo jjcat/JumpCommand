@@ -25,8 +25,8 @@ public class JumpCommandGUI : MonoBehaviour {
     Vector2 popupListScrollPos = Vector2.zero;
     bool   popupListDisplayUp = true;
 
-    int    popupListItemHeight = 26;  // magic number
-    int    popupListItemNum    = 5;
+    float  popupListItemHeight = 25f;  // magic number
+    int    popupListItemNum    = 8;
 
     event  Action<string> OnReceiveDownAndUpEvent;
     event  Action         OnReceiveEnterEvent;
@@ -181,7 +181,7 @@ public class JumpCommandGUI : MonoBehaviour {
 
         popupListSelPos = Mathf.Clamp(popupListSelPos + step, 0, popupListContent.Length-1);
         float start = popupListScrollPos.y;
-        float end   = popupListScrollPos.y + (popupListItemNum * popupListItemHeight);
+        float end   = popupListScrollPos.y + (popupListItemNum * popupListItemHeight-1);
         if( (popupListSelPos * popupListItemHeight) < start && key == "up") {
             popupListScrollPos = new Vector2(popupListScrollPos.x, Mathf.Clamp(popupListScrollPos.y-popupListItemHeight, 0, (popupListContent.Length-1)*popupListItemHeight ));
         }
@@ -441,6 +441,7 @@ public class JumpCommandGUI : MonoBehaviour {
         OnReceiveBackQuotaEvent += HandleBackQuotaPopupList;
         OnReceiveEnterEvent     += HandleSubmitPopupList;
         popupListSelPos = 0;
+        popupListScrollPos = Vector2.zero;
     }
 
     void ClosePopupList() {
@@ -454,6 +455,7 @@ public class JumpCommandGUI : MonoBehaviour {
         OnReceiveBackQuotaEvent -= HandleBackQuotaPopupList;
         OnReceiveEnterEvent     -= HandleSubmitPopupList;
         popupListSelPos = 0;
+        popupListScrollPos = Vector2.zero;
     }
 
     void DrawPopupList() {
