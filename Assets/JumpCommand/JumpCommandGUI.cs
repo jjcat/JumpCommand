@@ -25,8 +25,8 @@ public class JumpCommandGUI : MonoBehaviour {
     Vector2 popupListScrollPos = Vector2.zero;
     bool   popupListDisplayUp = true;
 
-    float  popupListItemHeight = 25f;  // magic number
-    int    popupListItemNum    = 8;
+    float   uiItemHeight = 25f;
+    int     popupListMaxDisplayItemNum  = 8;
 
     event  Action<string> OnReceiveDownAndUpEvent;
     event  Action         OnReceiveEnterEvent;
@@ -38,7 +38,7 @@ public class JumpCommandGUI : MonoBehaviour {
     
     [Tooltip("value between 0 and 1. 0 meas top of screen, 1 means bottom of screen.")]
     [RangeAttribute(0,1f)]
-    public float  yPos   = 0f;
+    public float  verticalPos   = 0f;
 
     // Use this for initialization
     void Awake () {
@@ -61,7 +61,10 @@ public class JumpCommandGUI : MonoBehaviour {
         bg.Apply();
         style.normal.background = bg;
         style.onNormal.background = tex;        
-        style.padding.left = style.padding.right = style.padding.top = style.padding.bottom = 4;        
+        style.padding.left = style.padding.right = style.padding.top = style.padding.bottom = 4;
+        style.margin.left = style.margin.right = style.margin.top = style.margin.bottom = 0;
+        style.fixedHeight = uiItemHeight;
+        style.stretchHeight = false;
     }
 
 
@@ -181,12 +184,12 @@ public class JumpCommandGUI : MonoBehaviour {
 
         popupListSelPos = Mathf.Clamp(popupListSelPos + step, 0, popupListContent.Length-1);
         float start = popupListScrollPos.y;
-        float end   = popupListScrollPos.y + (popupListItemNum * popupListItemHeight-1);
-        if( (popupListSelPos * popupListItemHeight) < start && key == "up") {
-            popupListScrollPos = new Vector2(popupListScrollPos.x, Mathf.Clamp(popupListScrollPos.y-popupListItemHeight, 0, (popupListContent.Length-1)*popupListItemHeight ));
+        float end   = popupListScrollPos.y + (popupListMaxDisplayItemNum * uiItemHeight-1);
+        if( (popupListSelPos * uiItemHeight) < start && key == "up") {
+            popupListScrollPos = new Vector2(popupListScrollPos.x, Mathf.Clamp(popupListScrollPos.y-uiItemHeight, 0, (popupListContent.Length-1)*uiItemHeight ));
         }
-        else if( (popupListSelPos * popupListItemHeight) > end && key == "down") {
-            popupListScrollPos = new Vector2(popupListScrollPos.x, Mathf.Clamp(popupListScrollPos.y+popupListItemHeight, 0, (popupListContent.Length-1)*popupListItemHeight ));
+        else if( (popupListSelPos * uiItemHeight) > end && key == "down") {
+            popupListScrollPos = new Vector2(popupListScrollPos.x, Mathf.Clamp(popupListScrollPos.y+uiItemHeight, 0, (popupListContent.Length-1)*uiItemHeight ));
         }
     }
 
@@ -458,12 +461,6 @@ public class JumpCommandGUI : MonoBehaviour {
         popupListScrollPos = Vector2.zero;
     }
 
-    void DrawPopupList() {
-        popupListScrollPos = GUILayout.BeginScrollView(popupListScrollPos, false, false, GUILayout.MaxHeight(popupListItemNum * popupListItemHeight));
-        popupListSelPos = GUILayout.SelectionGrid(popupListSelPos, popupListContent, 1, style, GUILayout.Width(Screen.width-16));
-        GUILayout.EndScrollView();        
-    }
-
     void HandleDragExited() {
         Event currentEvent = Event.current;
         var rect = new Rect(0, Screen.height, Screen.width, Screen.height);
@@ -485,7 +482,6 @@ public class JumpCommandGUI : MonoBehaviour {
     }
 
     void OnGUI() {
-        GUILayout.Label("Scroll: " + popupListScrollPos);
         if(!enable) return;
         DispatchSubmitEvent();
         DispatchEscapeEvent();
@@ -494,31 +490,36 @@ public class JumpCommandGUI : MonoBehaviour {
         HandleBackspace();
         HandleDragExited();
 
-        GUILayout.BeginArea(new Rect(0, (Screen.height - 50)*yPos, Screen.width, Screen.height));
-
-        // display popup list if open        
+        float yPos = (Screen.height - uiItemHeight*2 )*verticalPos;
         GUI.SetNextControlName("input");
-        GUILayout.Label(promptInfo);
+        GUI.Label(new Rect(0, yPos, Screen.width, uiItemHeight), promptInfo);
         String lastInput = input;
-        input = GUILayout.TextField(input,GUILayout.Width(Screen.width));
+        yPos += uiItemHeight;
+        input = GUI.TextField(new Rect(0, yPos, Screen.width, uiItemHeight), input);
+        yPos += uiItemHeight;
 
-        // display popup list if open
+        // draw popup list if open
         if(isPopupListOpen && popupListDisplayUp ) {
-            DrawPopupList();
+            float scrollWidth= 16f;
+
+            float popupListHeight = popupListMaxDisplayItemNum * uiItemHeight;
+            float contentHeight = uiItemHeight * popupListContent.Length;
+
+            // let draw above screen if yPos is greater than half screen height, otherwise popup list will draw out of screen.
+            if(yPos > Screen.height/2) {
+                yPos = (Screen.height - uiItemHeight*2)*verticalPos - Mathf.Min(popupListHeight,contentHeight);
+            }
+
+            popupListScrollPos = GUI.BeginScrollView(new Rect(0, yPos, Screen.width, popupListHeight), popupListScrollPos, new Rect(0,0,Screen.width-scrollWidth, contentHeight),false, false);
+                popupListSelPos = GUI.SelectionGrid(new Rect(0, 0, Screen.width, contentHeight), popupListSelPos, popupListContent, 1, style);
+            GUI.EndScrollView();        
         }
         
-        //GUILayout.Label("Parameter Num " + InputStatParameterCount.ToString());
-        GUILayout.EndArea();
-
-
         if (lastInput != input && !pressBackspace) {
             ShouldOpemPopupList();
             //HandleAutoCompletion();
         }
         HandleTab();
-
-        //remove later 
-        //GUILayout.Label("Current Foucs " + GUI.GetNameOfFocusedControl());
 
         if (focus) {
             GUI.FocusControl("input");
