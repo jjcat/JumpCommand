@@ -85,19 +85,28 @@ public class JumpCommandObject  {
         Object invokeResult = null;
         if(Method.IsStatic) {
             invokeResult = Method.Invoke(null, paramLst);
-            if(printResult && invokeResult != null) {
-                Debug.Log(invokeResult.ToString());
+            if(printResult ) {
+                if(invokeResult != null){
+                    Debug.Log(invokeResult.ToString());
+                }
+                else {
+                    Debug.Log("No return value");
+                }
             }
         }
         else {
             if(callee == null) {
-                //Debug.LogError(string.Format("Need type of \"{0}\" instance object to execute", Type.Name));
                 throw new Exception(string.Format("Need type of \"{0}\" instance object to execute", Type.Name));
             }
             else {
                 invokeResult = Method.Invoke(callee, paramLst);
-                if(printResult && invokeResult != null ) {
-                    Debug.Log(invokeResult.ToString());
+                if(printResult  ) {
+                    if(invokeResult != null){
+                        Debug.Log(invokeResult.ToString());
+                    }
+                    else {
+                        Debug.Log("No return value");
+                    }
                 }
             }
         }
