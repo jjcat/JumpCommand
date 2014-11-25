@@ -56,8 +56,7 @@ public class JumpCommandObject  {
         for (int i = 0; i < paramInfoLst.Length; ++i) {
             if(i >= paramStr.Length) { // if param string item number is less than param info item number, check defalut value from param info. 
                 if(paramInfoLst[i].RawDefaultValue == null) {
-                   Debug.LogError(string.Format("Missing argument '#{0}' when call method {1}", i, Method.Name));
-                   return false;
+                    throw new Exception(string.Format("Missing argument '#{0}' when call method {1}", i, Method.Name));
                 }
                 else {
                     paramLst[i] = paramInfoLst[i].RawDefaultValue;    
@@ -88,8 +87,8 @@ public class JumpCommandObject  {
         }
         else {
             if(callee == null) {
-                Debug.LogError(string.Format("Need type of \"{0}\" instance object to execute", Type.Name));
-                return false;
+                //Debug.LogError(string.Format("Need type of \"{0}\" instance object to execute", Type.Name));
+                throw new Exception(string.Format("Need type of \"{0}\" instance object to execute", Type.Name));
             }
             else {
                 Method.Invoke(callee, paramLst);
