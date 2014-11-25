@@ -136,12 +136,40 @@ static public class JumpCommand {
         return null;
     }
 
+    public static void RemoveAt<T>(ref T[] arr, int index) {
+        for (int a = index; a < arr.Length - 1; a++) {
+            // moving elements downwards, to fill the gap at [index]
+            arr[a] = arr[a + 1];
+        }
+        // finally, let's decrement Array's size by one
+        Array.Resize(ref arr, arr.Length - 1);
+    }
+
     static public void Execute(string command) {
         AddHistory(command);
+
+        bool printResult = false;
         string[] argv = ParseArguments(command);
         if (argv.Length == 0) {
             return; 
         }
+
+
+        // check option
+        int printOptionIndex = -1;
+        for(int i = 1; i<argv.Length; i++) {
+            if(argv[i] == "-p" || argv[i] == "-P") {
+                printResult = true;
+                printOptionIndex = i;
+                break;
+            }
+        }
+
+        // if found option remove it
+        if(printOptionIndex > 0) {
+            RemoveAt<string>(ref argv, printOptionIndex);
+        }
+
         if (mCmdLst.ContainsKey(argv[0])) {
             bool success  = true;
             foreach(var cmd in mCmdLst[argv[0]]) {
@@ -153,19 +181,19 @@ static public class JumpCommand {
                         if(cmd.GameObjFullName != "") {
                             GameObject go = GameObject.Find(cmd.GameObjFullName) as GameObject;
                             var component = go.GetComponent(cmd.Type);
-                            cmd.Call(paramStr, component);
+                            cmd.Call(paramStr, component, printResult);
                         }
                         else if(Callee is GameObject) {
                             var go = Callee as GameObject;
                             var component = go.GetComponent(cmd.Type);
-                            cmd.Call(paramStr, component);
+                            cmd.Call(paramStr, component, printResult);
                         }
                         else {
-                            cmd.Call(paramStr, Callee);
+                            cmd.Call(paramStr, Callee, printResult);
                         }
                     }
                     else {
-                        cmd.Call(paramStr, Callee);
+                        cmd.Call(paramStr, Callee, printResult);
                     }                    
                 } catch {
                     success  = false;

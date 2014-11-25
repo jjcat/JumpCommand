@@ -48,7 +48,7 @@ public class JumpCommandObject  {
     }
 
 
-    public bool Call(string[] paramStr, Object callee = null) {        
+    public bool Call(string[] paramStr, Object callee, bool printResult = false) {        
         // create parameter list
         ParameterInfo[] paramInfoLst = Method.GetParameters();
         Object[] paramLst = new Object[paramInfoLst.Length];
@@ -82,8 +82,12 @@ public class JumpCommandObject  {
         }
 
         // call method with parameter list
+        Object invokeResult = null;
         if(Method.IsStatic) {
-            Method.Invoke(null, paramLst);
+            invokeResult = Method.Invoke(null, paramLst);
+            if(printResult && invokeResult != null) {
+                Debug.Log(invokeResult.ToString());
+            }
         }
         else {
             if(callee == null) {
@@ -91,7 +95,10 @@ public class JumpCommandObject  {
                 throw new Exception(string.Format("Need type of \"{0}\" instance object to execute", Type.Name));
             }
             else {
-                Method.Invoke(callee, paramLst);
+                invokeResult = Method.Invoke(callee, paramLst);
+                if(printResult && invokeResult != null ) {
+                    Debug.Log(invokeResult.ToString());
+                }
             }
         }
         return true;
