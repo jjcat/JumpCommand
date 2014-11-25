@@ -460,7 +460,7 @@ public class JumpCommandGUI : MonoBehaviour {
 
     void DrawPopupList() {
         popupListScrollPos = GUILayout.BeginScrollView(popupListScrollPos, false, false, GUILayout.MaxHeight(popupListItemNum * popupListItemHeight));
-        popupListSelPos = GUILayout.SelectionGrid(popupListSelPos, popupListContent, 1, style, GUILayout.Width(Screen.width));
+        popupListSelPos = GUILayout.SelectionGrid(popupListSelPos, popupListContent, 1, style, GUILayout.Width(Screen.width-16));
         GUILayout.EndScrollView();        
     }
 
