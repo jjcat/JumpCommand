@@ -149,6 +149,7 @@ static public class JumpCommand {
         AddHistory(command);
 
         bool printResult = false;
+        bool invokeAllComponents = false;
         string[] argv = ParseArguments(command);
         if (argv.Length == 0) {
             return; 
@@ -157,10 +158,23 @@ static public class JumpCommand {
 
         // check option
         int printOptionIndex = -1;
-        for(int i = 1; i<argv.Length; i++) {
-            if(argv[i] == "-p" || argv[i] == "-P") {
+        int invokeAllComponentsIndex = -1;
+        int i = 1;
+        while(i < argv.Length) {
+            if(argv[i] == "-p" ) {
                 printResult = true;
-                printOptionIndex = i;
+                RemoveAt<string>(ref argv, i);
+            }
+            else if(argv[i] == "-a") {
+                invokeAllComponents = true;
+                RemoveAt<string>(ref argv, i);
+            }
+            else if(argv[i] == "-ap" || argv[i] == "-pa") {
+                invokeAllComponents = true;
+                printResult = true;
+                RemoveAt<string>(ref argv, i);                
+            }
+            else {
                 break;
             }
         }
@@ -178,18 +192,26 @@ static public class JumpCommand {
                     string[] paramStr = new string[argv.Length - 1];
                     Array.Copy(argv,1,paramStr,0,argv.Length-1);
                     if(!cmd.Method.IsStatic) {  // the callee will be the current select game object
-                        if(cmd.GameObjFullName != "") {
-                            GameObject go = GameObject.Find(cmd.GameObjFullName) as GameObject;
-                            var component = go.GetComponent(cmd.Type);
-                            cmd.Call(paramStr, component, printResult);
-                        }
-                        else if(Callee is GameObject) {
-                            var go = Callee as GameObject;
-                            var component = go.GetComponent(cmd.Type);
-                            cmd.Call(paramStr, component, printResult);
+                        // find all components and call it
+                        if(invokeAllComponents) {
+                            foreach (GameObject go in UnityEngine.Object.FindObjectsOfType(typeof(GameObject))) {
+                                if (go.transform.parent == null) {
+                                    foreach(var c in go.GetComponentsInChildren(cmd.Type)) {
+                                        cmd.Call(paramStr, c, printResult);
+                                    }
+                                }
+                            }
                         }
                         else {
-                            cmd.Call(paramStr, Callee, printResult);
+                            GameObject go = null;
+                            if(cmd.GameObjFullName != "") {
+                                go = GameObject.Find(cmd.GameObjFullName) as GameObject;
+                            }
+                            else if(Callee is GameObject) {
+                                go = Callee as GameObject;
+                            }
+                            var component = go.GetComponent(cmd.Type);
+                            cmd.Call(paramStr, component, printResult);                            
                         }
                     }
                     else {
