@@ -186,6 +186,7 @@ static public class JumpCommand {
 
         if (mCmdLst.ContainsKey(argv[0])) {
             bool success  = true;
+            Exception exception = new Exception();
             foreach(var cmd in mCmdLst[argv[0]]) {
                 try {
                     success = true;
@@ -217,15 +218,16 @@ static public class JumpCommand {
                     else {
                         cmd.Call(paramStr, Callee, printResult);
                     }                    
-                } catch {
+                } catch (Exception e){
                     success  = false;
+                    exception = e;
                 }
                 if(success ) { 
                     break;                
                 }
             }
             if(!success) {
-                throw new Exception("Executed failed");
+                throw new Exception("Executed failed " + exception.ToString());
             }
         }
         else {
