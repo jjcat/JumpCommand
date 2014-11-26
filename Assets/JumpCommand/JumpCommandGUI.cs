@@ -481,6 +481,43 @@ public class JumpCommandGUI : MonoBehaviour {
         }        
     }
 
+    bool isDragging = false;
+    bool isPressGUI = false;
+    Vector2 startMousePos = Vector2.zero;
+    float startVerticalPos = 0;
+
+    void HandleMouseDrag() {
+        Event currentEvent = Event.current;
+        Vector2 mousePos = currentEvent.mousePosition;
+        if(currentEvent.type == EventType.MouseDrag) {
+            if(isPressGUI && isDragging) {
+                float delta = (mousePos - startMousePos).y/(Screen.height - uiItemHeight*2);
+                verticalPos = Mathf.Clamp(startVerticalPos + delta, 0, 1f) ;
+                Debug.Log("Update Position");
+            }
+            else if(!isDragging && isPressGUI) {
+                Debug.Log("Start Drag");
+                isDragging = true;
+            }
+        }
+        else if(currentEvent.type == EventType.MouseUp) {
+            if(isPressGUI && isDragging) {
+                isPressGUI = false;
+                isDragging = false;
+                Debug.Log("Over Drag");
+            }
+        }
+        else if(currentEvent.type == EventType.MouseDown) {
+            float yPos = (Screen.height - uiItemHeight*2 )*verticalPos;
+            if( new Rect(0, yPos, Screen.width, uiItemHeight*2).Contains(mousePos)) {
+                Debug.Log("Hit GUI");
+                startMousePos = mousePos;
+                startVerticalPos = verticalPos;
+                isPressGUI = true;
+            }
+        }
+    }
+
     void OnGUI() {
         if(!enable) return;
         DispatchSubmitEvent();
@@ -489,6 +526,7 @@ public class JumpCommandGUI : MonoBehaviour {
         DispatchBackQuotaEvent();
         HandleBackspace();
         HandleDragExited();
+        HandleMouseDrag();
 
         float yPos = (Screen.height - uiItemHeight*2 )*verticalPos;
         GUI.SetNextControlName("input");
