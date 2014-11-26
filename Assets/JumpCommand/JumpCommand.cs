@@ -231,7 +231,7 @@ static public class JumpCommand {
             }
         }
         else {
-            Debug.LogError(string.Format("Can not find command \"{0}\"",argv[0]));
+            throw new Exception(string.Format("Can not find command \"{0}\"",argv[0]));
         }
     }
 

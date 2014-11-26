@@ -32,6 +32,8 @@ public class JumpCommandGUI : MonoBehaviour {
     Vector2 mousePosBeforeDrag = Vector2.zero;
     float verticalPosBeforeDrag = 0;
 
+    float shock = 0;
+
 
     event  Action<string> OnReceiveDownAndUpEvent;
     event  Action         OnReceiveEnterEvent;
@@ -92,7 +94,6 @@ public class JumpCommandGUI : MonoBehaviour {
 
     private void HandleSubmitInput() {
         OnSumbitCommandAction();
-        input = "";
         historyIndex = -1;
         cursorPos    = -1;
     }
@@ -100,9 +101,12 @@ public class JumpCommandGUI : MonoBehaviour {
     private void OnSumbitCommandAction() {
         try {
             JumpCommand.Execute(input);
+            input = "";
         }
         catch (Exception e){
           Debug.LogError("Execute Failed" + e.ToString());
+          shock = 2;
+          Invoke("StopShock", 0.2f);
           return;
         }
     }
@@ -122,6 +126,10 @@ public class JumpCommandGUI : MonoBehaviour {
                 }
             }
         }
+    }
+
+    void StopShock(){
+        shock = 0;
     }
 
     static private string GetGameObjectFullName(GameObject go) {
@@ -413,6 +421,8 @@ public class JumpCommandGUI : MonoBehaviour {
             }
         }
 
+        shock = 0 - shock;
+
 #if UNITY_EDITOR
         // update selected game object as callee.
         if(Selection.activeGameObject != lastSelection) {
@@ -527,7 +537,7 @@ public class JumpCommandGUI : MonoBehaviour {
         HandleDragExited();
         HandleMouseDrag();
 
-        float yPos = (Screen.height - uiItemHeight*2 )*verticalPos;
+        float yPos = (Screen.height - uiItemHeight*2 )*verticalPos + shock;
         GUI.SetNextControlName("input");
         GUI.Label(new Rect(0, yPos, Screen.width, uiItemHeight), promptInfo);
         String lastInput = input;
