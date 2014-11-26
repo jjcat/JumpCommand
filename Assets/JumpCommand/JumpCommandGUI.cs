@@ -445,6 +445,7 @@ public class JumpCommandGUI : MonoBehaviour {
         OnReceiveEnterEvent     += HandleSubmitPopupList;
         popupListSelPos = 0;
         popupListScrollPos = Vector2.zero;
+        popupListMaxDisplayItemNum = (int)Mathf.Clamp((Screen.height/2-uiItemHeight)/uiItemHeight, 3f, 9f) ;
     }
 
     void ClosePopupList() {
@@ -544,7 +545,7 @@ public class JumpCommandGUI : MonoBehaviour {
             float contentHeight = uiItemHeight * popupListContent.Length;
 
             // let draw above screen if yPos is greater than half screen height, otherwise popup list will draw out of screen.
-            if(yPos > Screen.height/2) {
+            if(yPos > Screen.height/2 + uiItemHeight) {
                 yPos = (Screen.height - uiItemHeight*2)*verticalPos - Mathf.Min(popupListHeight,contentHeight);
             }
 
