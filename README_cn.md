@@ -1,6 +1,6 @@
 #![](http://i.imgur.com/rBXIi4Q.png)JumpCommand
 
-JumpCommand能在Unity中输入命令行来进行函数调用。
+JumpCommand 能在Unity中输入命令行来进行函数调用。
 
 ##截屏
 
