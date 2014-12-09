@@ -29,7 +29,7 @@ public class JumpCommandObject  {
         if(helpinfo != "") {
             helpinfo = "\"" + helpinfo + "\"";
         }
-        return string.Format("{0,-10} <b>{1}</b>   <i>{2}</i>", Command, parminfo, helpinfo);        
+        return string.Format("<b>{0,-10}</b> <color=grey>{1}</color>   <i>{2}</i>", Command, parminfo, helpinfo);        
     }
 
     public override string ToString() {
