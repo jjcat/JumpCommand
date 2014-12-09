@@ -27,9 +27,9 @@ public class JumpCommandGUI : MonoBehaviour {
     float    popupListItemHeight = 25f;
     int      popupListMaxDisplayItemNum  = 8;
 
-    bool enableDragging = false;
-    Vector2 mousePosBeforeDrag = Vector2.zero;
-    float verticalPosBeforeDrag = 0;
+    bool    dragging = false;
+    Vector2 mousePosBeforeDragging = Vector2.zero;
+    float   verticalPosBeforeDragging = 0;
 
     float shockPixel = 0;
 
@@ -452,9 +452,9 @@ public class JumpCommandGUI : MonoBehaviour {
         UpdatePrompt();
         lastSelection = null;
         popupListOpen = false;
-        enableDragging = false;
-        mousePosBeforeDrag = Vector2.zero;
-        verticalPosBeforeDrag = 0f;
+        dragging = false;
+        mousePosBeforeDragging = Vector2.zero;
+        verticalPosBeforeDragging = 0f;
 
         OnReceiveDownAndUpEvent += HandleUpOrDownInput;
         OnReceiveEnterEvent     += HandleSubmitInput;
@@ -516,22 +516,22 @@ public class JumpCommandGUI : MonoBehaviour {
         Vector2 mousePos = currentEvent.mousePosition;
 
         if(currentEvent.type == EventType.MouseDrag) {
-            if(enableDragging) {
-                float delta = (mousePos - mousePosBeforeDrag).y/(Screen.height - popupListItemHeight*2);
-                verticalPos = Mathf.Clamp(verticalPosBeforeDrag + delta, 0, 1f) ;
+            if(dragging) {
+                float delta = (mousePos - mousePosBeforeDragging).y/(Screen.height - popupListItemHeight*2);
+                verticalPos = Mathf.Clamp(verticalPosBeforeDragging + delta, 0, 1f) ;
             }
         }
         else if(currentEvent.type == EventType.MouseUp) {
-            if(enableDragging) {
-                enableDragging = false;
+            if(dragging) {
+                dragging = false;
             }
         }
         else if(currentEvent.type == EventType.MouseDown) {
             float yPos = (Screen.height - popupListItemHeight*2 )*verticalPos;
             if( new Rect(0, yPos, Screen.width, popupListItemHeight*2).Contains(mousePos)) {
-                mousePosBeforeDrag    = mousePos;
-                verticalPosBeforeDrag = verticalPos;
-                enableDragging = true;
+                mousePosBeforeDragging    = mousePos;
+                verticalPosBeforeDragging = verticalPos;
+                dragging = true;
             }
         }
     }

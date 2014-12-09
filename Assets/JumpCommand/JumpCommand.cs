@@ -11,6 +11,17 @@ public class JumpCommandException : Exception {
     public JumpCommandException(string msg) : base(msg) {}
 }
 
+public class JumpCommandRegister : Attribute {
+    public string command;
+    public string help;
+    public string gameObjFullName;
+
+    public JumpCommandRegister(string command, string help = "", string gameObjFullName = "") {
+        this.command     = command;
+        this.help        = help;
+        this.gameObjFullName = gameObjFullName;
+    }
+}
 
 static public class JumpCommand {
     static private  Dictionary<string, List<JumpCommandObject>> mCmdLst = new Dictionary<string, List<JumpCommandObject>>();
