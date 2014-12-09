@@ -5,6 +5,7 @@ using System.Reflection;
 using Object = System.Object;
 using Debug = UnityEngine.Debug;
 using System.ComponentModel;
+using System.IO;
 
 public class JumpCommandException : Exception {
     public JumpCommandException(string msg) : base(msg) {}
@@ -19,10 +20,24 @@ static public class JumpCommand {
     static private  int  MaxHistoryNum = 100; 
     static private  int  FirstHistoryIndex = -1;
     static public   event Action<Object> OnChangeCallee;
+    static string historyFile;
+
     static JumpCommand() {}
 
     static public void Awake() {
         RegisterAllCommandObjects();
+
+        // read history
+        historyFile = Application.temporaryCachePath + "/jumpcommand.history";
+        if(!File.Exists(historyFile)) {
+            TextWriter tw = new StreamWriter(historyFile);
+            tw.Close();
+        }
+        ReadHistoryFile();
+    }
+
+    static public void OnDisable() {
+        SaveHistoryFile();
     }
 
     static private bool IsComponentType(Type type) {
@@ -36,6 +51,23 @@ static public class JumpCommand {
             return IsComponentType(type.BaseType);
         }
     }
+
+    static private void ReadHistoryFile() {
+        TextReader tr = new StreamReader(historyFile);
+        while(tr.Peek() != -1) {
+            AddHistory(tr.ReadLine());
+        }
+        tr.Close();
+    }
+
+    static private void SaveHistoryFile() {
+        TextWriter tw = new StreamWriter(historyFile);
+        for(int i = HistoryNum - 1; i >= 0; i--) {
+            tw.WriteLine(GetHistory(i));
+        }
+        tw.Close();
+    }
+
 
     static private void RegisterAllCommandObjects(Assembly assembly) {
         // find all type in assembly, if type's attributes contains JumpCommandRegister, then register the command.

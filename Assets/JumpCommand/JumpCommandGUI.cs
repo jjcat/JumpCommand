@@ -53,6 +53,11 @@ public class JumpCommandGUI : MonoBehaviour {
         CreatePopupListStyle();
     }
 
+    void OnDisable() {
+        JumpCommand.OnDisable();
+    }
+
+
     void CreatePopupListStyle() {
         style.alignment = TextAnchor.MiddleLeft;
         style.normal.textColor = Color.white;
@@ -72,8 +77,6 @@ public class JumpCommandGUI : MonoBehaviour {
         style.fixedHeight = uiItemHeight;
         style.stretchHeight = false;
     }
-
-
     
     private bool KeyDown(string key) {
         return Event.current.Equals(Event.KeyboardEvent(key));
