@@ -539,7 +539,7 @@ public class JumpCommandGUI : MonoBehaviour {
 
         float yPos = (Screen.height - uiItemHeight*2 )*verticalPos + shock;
         GUI.SetNextControlName("input");
-        GUI.Label(new Rect(0, yPos, Screen.width, uiItemHeight), promptInfo);
+        EditorGUI.DropShadowLabel(new Rect(0, yPos, Screen.width, uiItemHeight), promptInfo, GUI.skin.label);
         String lastInput = input;
         yPos += uiItemHeight;
         input = GUI.TextField(new Rect(0, yPos, Screen.width, uiItemHeight), input);
