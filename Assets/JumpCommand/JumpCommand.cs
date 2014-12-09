@@ -153,7 +153,7 @@ static public class JumpCommand {
         foreach(string key in mCmdLst.Keys) {
             if (key.ToUpper().StartsWith(command.ToUpper())) {
                 foreach(var cmd in mCmdLst[key]) {
-                    result.Add(cmd.ToString());
+                    result.Add(cmd.GetRichText());
                 }
             }
         }

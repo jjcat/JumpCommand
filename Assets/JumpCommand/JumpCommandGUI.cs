@@ -76,6 +76,7 @@ public class JumpCommandGUI : MonoBehaviour {
         popupListStyle.margin.left = popupListStyle.margin.right = popupListStyle.margin.top = popupListStyle.margin.bottom = 0;
         popupListStyle.fixedHeight = popupListItemHeight;
         popupListStyle.stretchHeight = false;
+        popupListStyle.richText = true;
     }
     
     private bool KeyDown(string key) {
