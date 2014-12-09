@@ -23,7 +23,6 @@ public class JumpCommandGUI : MonoBehaviour {
     string[] popupListContent;
     int    popupListSelPos = 0;
     Vector2 popupListScrollPos = Vector2.zero;
-    bool   popupListDisplayUp = true;
 
     float   uiItemHeight = 25f;
     int     popupListMaxDisplayItemNum  = 8;
@@ -551,13 +550,13 @@ public class JumpCommandGUI : MonoBehaviour {
         yPos += uiItemHeight;
 
         // draw popup list if open
-        if(isPopupListOpen && popupListDisplayUp ) {
+        if(isPopupListOpen) {
             float scrollWidth= 16f;
 
             float popupListHeight = popupListMaxDisplayItemNum * uiItemHeight;
             float contentHeight = uiItemHeight * popupListContent.Length;
 
-            // let draw above screen if yPos is greater than half screen height, otherwise popup list will draw out of screen.
+            // make draw above screen if yPos is greater than half of screen height, if not popup list will draw out of screen.
             if(yPos > Screen.height/2 + uiItemHeight) {
                 yPos = (Screen.height - uiItemHeight*2)*verticalPos - Mathf.Min(popupListHeight,contentHeight);
             }

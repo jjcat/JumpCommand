@@ -37,13 +37,9 @@ static public class JumpCommand {
         }
     }
 
-    static private void RegisterAllCommandObjects() {
-        mCmdLst.Clear();
-        ComponentTypes.Clear();
-        var csharpDLL = Assembly.GetExecutingAssembly();  // unity csharp.dll assembly
-
-        // find all type in csharp.dll, if type's attributes contains JumpCommandRegister, then register the command.
-        foreach( var t in csharpDLL.GetTypes()) {
+    static private void RegisterAllCommandObjects(Assembly assembly) {
+        // find all type in assembly, if type's attributes contains JumpCommandRegister, then register the command.
+        foreach( var t in assembly.GetTypes()) {
             if(IsComponentType(t)) {
                 ComponentTypes.Add(t);
             }
@@ -66,7 +62,16 @@ static public class JumpCommand {
                     }
                 }
             }
-        }
+        }        
+    }
+
+    static private void RegisterAllCommandObjects() {
+        mCmdLst.Clear();
+        ComponentTypes.Clear();
+        var csharpDLL = Assembly.GetExecutingAssembly();  // unity csharp.dll assembly
+        //var editorDLL = Assembly.GetAssembly(typeof(EditorTest));
+        RegisterAllCommandObjects(csharpDLL);        
+        return;
     }
 
     static public bool Constains(string commandName) {
