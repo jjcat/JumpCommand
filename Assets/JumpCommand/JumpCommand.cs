@@ -20,11 +20,11 @@ static public class JumpCommand {
     static private  int  MaxHistoryNum = 100; 
     static private  int  FirstHistoryIndex = -1;
     static public   event Action<Object> OnChangeCallee;
-    static string historyFile;
+    static private  string historyFile;
 
     static JumpCommand() {}
 
-    static public void Awake() {
+    static public void Init() {
         RegisterAllCommandObjects();
 
         // read history
@@ -36,7 +36,7 @@ static public class JumpCommand {
         ReadHistoryFile();
     }
 
-    static public void OnDisable() {
+    static public void Deinit() {
         SaveHistoryFile();
     }
 
@@ -106,7 +106,7 @@ static public class JumpCommand {
         return;
     }
 
-    static public bool Constains(string commandName) {
+    static private bool ConstainsCommand(string commandName) {
         return mCmdLst.ContainsKey(commandName);
     }
 
@@ -130,7 +130,7 @@ static public class JumpCommand {
         get {return History.Count;}
     }
 
-    static public void CleanHistory() {
+    static private void CleanHistory() {
         History.Clear();
         FirstHistoryIndex = -1;
     }
@@ -177,7 +177,7 @@ static public class JumpCommand {
         return null;
     }
 
-    public static void RemoveAt<T>(ref T[] arr, int index) {
+    static private void RemoveAt<T>(ref T[] arr, int index) {
         for (int a = index; a < arr.Length - 1; a++) {
             // moving elements downwards, to fill the gap at [index]
             arr[a] = arr[a + 1];
@@ -200,8 +200,6 @@ static public class JumpCommand {
         // check option flag
         // -p: print return value
         // -a: invoke all components
-        int printOptionIndex = -1;
-        int invokeAllComponentsIndex = -1;
         int i = 1;
         while(i < argv.Length) {
             if(argv[i] == "-p" ) {
@@ -222,14 +220,9 @@ static public class JumpCommand {
             }
         }
 
-        // if found option remove it
-        if(printOptionIndex > 0) {
-            RemoveAt<string>(ref argv, printOptionIndex);
-        }
-
-        if (mCmdLst.ContainsKey(argv[0])) {
+        if (ConstainsCommand(argv[0])) {
             bool success  = true;
-            Exception exception = new Exception();
+            Exception lastException = new Exception();
             foreach(var cmd in mCmdLst[argv[0]]) {
                 try {
                     success = true;
@@ -269,9 +262,9 @@ static public class JumpCommand {
                 } 
                 catch (JumpCommandException e) {
                     success  = false;
-                    exception = e;                    
+                    lastException = e;                    
                 }
-                catch (Exception e) {
+                catch {
                     throw;
                 }
                 if(success ) { 
@@ -279,7 +272,7 @@ static public class JumpCommand {
                 }
             }
             if(!success) {
-                throw new JumpCommandException(exception.Message);
+                throw new JumpCommandException(lastException.Message);
             }
         }
         else {

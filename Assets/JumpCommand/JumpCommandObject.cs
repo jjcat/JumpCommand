@@ -25,9 +25,6 @@ public class JumpCommandObject  {
 
     public override string ToString() {
         string parminfo = ParametersInfo();
-        if(parminfo!="") {
-            parminfo =  parminfo;
-        }
         string helpinfo = Help;
         if(helpinfo != "") {
             helpinfo = "\"" + helpinfo + "\"";

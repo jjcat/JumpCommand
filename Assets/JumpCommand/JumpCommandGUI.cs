@@ -17,21 +17,21 @@ public class JumpCommandGUI : MonoBehaviour {
     int    cursorPos      = -1;
     bool   pressBackspace = false;
     string promptInfo     = "";
-    [HideInInspector]
-    GUIStyle style = new GUIStyle();  // popup list style
-    bool   isPopupListOpen = false;
-    string[] popupListContent;
-    int    popupListSelPos = 0;
-    Vector2 popupListScrollPos = Vector2.zero;
 
-    float   uiItemHeight = 25f;
-    int     popupListMaxDisplayItemNum  = 8;
+    [HideInInspector]
+    GUIStyle popupListStyle = new GUIStyle();  // popup list style
+    bool     popupListOpen = false;
+    string[] popupListContent;
+    int      popupListSelIndex = 0;
+    Vector2  popupListScrollPos = Vector2.zero;
+    float    popupListItemHeight = 25f;
+    int      popupListMaxDisplayItemNum  = 8;
 
     bool enableDragging = false;
     Vector2 mousePosBeforeDrag = Vector2.zero;
     float verticalPosBeforeDrag = 0;
 
-    float shock = 0;
+    float shockPixel = 0;
 
 
     event  Action<string> OnReceiveDownAndUpEvent;
@@ -48,19 +48,19 @@ public class JumpCommandGUI : MonoBehaviour {
 
     // Use this for initialization
     void Awake () {
-        JumpCommand.Awake();
+        JumpCommand.Init();
         JumpCommand.OnChangeCallee += HandleChangeCalleeEvent;
         CreatePopupListStyle();
     }
 
     void OnDisable() {
-        JumpCommand.OnDisable();
+        JumpCommand.Deinit();
     }
 
 
     void CreatePopupListStyle() {
-        style.alignment = TextAnchor.MiddleLeft;
-        style.normal.textColor = Color.white;
+        popupListStyle.alignment = TextAnchor.MiddleLeft;
+        popupListStyle.normal.textColor = Color.white;
         var tex = new Texture2D(2, 2);
         var colors = new Color[4]{Color.white,Color.white,Color.white,Color.white};
         var bg = new Texture2D(2, 2);
@@ -70,12 +70,12 @@ public class JumpCommandGUI : MonoBehaviour {
         bg.SetPixels(bgColors);
         tex.Apply();
         bg.Apply();
-        style.normal.background = bg;
-        style.onNormal.background = tex;        
-        style.padding.left = style.padding.right = style.padding.top = style.padding.bottom = 4;
-        style.margin.left = style.margin.right = style.margin.top = style.margin.bottom = 0;
-        style.fixedHeight = uiItemHeight;
-        style.stretchHeight = false;
+        popupListStyle.normal.background = bg;
+        popupListStyle.onNormal.background = tex;        
+        popupListStyle.padding.left = popupListStyle.padding.right = popupListStyle.padding.top = popupListStyle.padding.bottom = 4;
+        popupListStyle.margin.left = popupListStyle.margin.right = popupListStyle.margin.top = popupListStyle.margin.bottom = 0;
+        popupListStyle.fixedHeight = popupListItemHeight;
+        popupListStyle.stretchHeight = false;
     }
     
     private bool KeyDown(string key) {
@@ -88,7 +88,7 @@ public class JumpCommandGUI : MonoBehaviour {
 
     private void HandleSubmitPopupList() {
         TextEditor te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
-        input = popupListContent[popupListSelPos].Split(new char[1]{' '})[0];
+        input = popupListContent[popupListSelIndex].Split(new char[1]{' '})[0];
         te.pos = input.Length;
         te.selectPos = te.pos;
         ClosePopupList();         
@@ -112,7 +112,7 @@ public class JumpCommandGUI : MonoBehaviour {
             throw;
         }
         finally {
-            shock = 2;
+            shockPixel = 2;
             Invoke("StopShock", 0.2f);            
         }
 
@@ -136,7 +136,7 @@ public class JumpCommandGUI : MonoBehaviour {
     }
 
     void StopShock(){
-        shock = 0;
+        shockPixel = 0;
     }
 
     static private string GetGameObjectFullName(GameObject go) {
@@ -202,14 +202,14 @@ public class JumpCommandGUI : MonoBehaviour {
             step = 1;
         }
 
-        popupListSelPos = Mathf.Clamp(popupListSelPos + step, 0, popupListContent.Length-1);
+        popupListSelIndex = Mathf.Clamp(popupListSelIndex + step, 0, popupListContent.Length-1);
         float start = popupListScrollPos.y;
-        float end   = popupListScrollPos.y + (popupListMaxDisplayItemNum * uiItemHeight-1);
-        if( (popupListSelPos * uiItemHeight) < start && key == "up") {
-            popupListScrollPos = new Vector2(popupListScrollPos.x, Mathf.Clamp(popupListScrollPos.y-uiItemHeight, 0, (popupListContent.Length-1)*uiItemHeight ));
+        float end   = popupListScrollPos.y + (popupListMaxDisplayItemNum * popupListItemHeight-1);
+        if( (popupListSelIndex * popupListItemHeight) < start && key == "up") {
+            popupListScrollPos = new Vector2(popupListScrollPos.x, Mathf.Clamp(popupListScrollPos.y-popupListItemHeight, 0, (popupListContent.Length-1)*popupListItemHeight ));
         }
-        else if( (popupListSelPos * uiItemHeight) > end && key == "down") {
-            popupListScrollPos = new Vector2(popupListScrollPos.x, Mathf.Clamp(popupListScrollPos.y+uiItemHeight, 0, (popupListContent.Length-1)*uiItemHeight ));
+        else if( (popupListSelIndex * popupListItemHeight) > end && key == "down") {
+            popupListScrollPos = new Vector2(popupListScrollPos.x, Mathf.Clamp(popupListScrollPos.y+popupListItemHeight, 0, (popupListContent.Length-1)*popupListItemHeight ));
         }
     }
 
@@ -272,17 +272,17 @@ public class JumpCommandGUI : MonoBehaviour {
     private void HandleTab()
     {
         TextEditor te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
-        if(KeyDown("tab") && isPopupListOpen) {
-            input = popupListContent[popupListSelPos].Split(new char[1]{' '})[0];
+        if(KeyDown("tab") && popupListOpen) {
+            input = popupListContent[popupListSelIndex].Split(new char[1]{' '})[0];
             te.pos = input.Length;
             te.selectPos = te.pos;
             ClosePopupList();
         }
-        else if(KeyDown("tab") && !isPopupListOpen){
+        else if(KeyDown("tab") && !popupListOpen){
             List<string> autoCompletions = JumpCommand.GetAutoCompletionCommands(input);
             if(autoCompletions.Count > 0 ) {
                 popupListContent = autoCompletions.ToArray();
-                input = popupListContent[popupListSelPos].Split(new char[1]{' '})[0];
+                input = popupListContent[popupListSelIndex].Split(new char[1]{' '})[0];
                 te.pos = input.Length;
                 te.selectPos = te.pos;
                 OpenPopupList();
@@ -308,12 +308,12 @@ public class JumpCommandGUI : MonoBehaviour {
         List<string> autoCompletions = JumpCommand.GetAutoCompletionCommands(input);
         if(autoCompletions.Count > 0 ) {
             popupListContent = autoCompletions.ToArray();
-            if(!isPopupListOpen) {
+            if(!popupListOpen) {
                 OpenPopupList();
             }
         }        
         else {
-            if(isPopupListOpen) {
+            if(popupListOpen) {
                 ClosePopupList();
             }
         }
@@ -376,6 +376,9 @@ public class JumpCommandGUI : MonoBehaviour {
                 }
             }
         }
+        else if(gameObjectPath == ".") {
+            // do nothing
+        }
         else if(gameObjectPath == "~" || gameObjectPath == "") {  // go to current selected game object
             JumpCommand.SetCallee(Selection.activeGameObject);
         }
@@ -428,7 +431,8 @@ public class JumpCommandGUI : MonoBehaviour {
             }
         }
 
-        shock = 0 - shock;
+        // shock GUI when execute failed
+        shockPixel = 0 - shockPixel;
 
 #if UNITY_EDITOR
         // update selected game object as callee.
@@ -448,7 +452,7 @@ public class JumpCommandGUI : MonoBehaviour {
         historyIndex = -1;
         UpdatePrompt();
         lastSelection = null;
-        isPopupListOpen = false;
+        popupListOpen = false;
         enableDragging = false;
         mousePosBeforeDrag = Vector2.zero;
         verticalPosBeforeDrag = 0f;
@@ -460,7 +464,7 @@ public class JumpCommandGUI : MonoBehaviour {
     }
 
     void OpenPopupList() {  
-        isPopupListOpen = true;
+        popupListOpen = true;
         OnReceiveDownAndUpEvent -= HandleUpOrDownInput;
         OnReceiveEscapeEvent    -= HandleEscapeInput;
         OnReceiveBackQuotaEvent -= HandleBackQuotaInput;
@@ -469,13 +473,13 @@ public class JumpCommandGUI : MonoBehaviour {
         OnReceiveEscapeEvent    += HandleEscapePopupList;
         OnReceiveBackQuotaEvent += HandleBackQuotaPopupList;
         OnReceiveEnterEvent     += HandleSubmitPopupList;
-        popupListSelPos = 0;
+        popupListSelIndex = 0;
         popupListScrollPos = Vector2.zero;
-        popupListMaxDisplayItemNum = (int)Mathf.Clamp((Screen.height/2-uiItemHeight)/uiItemHeight, 3f, 9f) ;
+        popupListMaxDisplayItemNum = (int)Mathf.Clamp((Screen.height/2-popupListItemHeight)/popupListItemHeight, 3f, 9f) ;
     }
 
     void ClosePopupList() {
-        isPopupListOpen = false; 
+        popupListOpen = false; 
         OnReceiveDownAndUpEvent += HandleUpOrDownInput;
         OnReceiveEscapeEvent    += HandleEscapeInput;
         OnReceiveBackQuotaEvent += HandleBackQuotaInput;
@@ -484,13 +488,12 @@ public class JumpCommandGUI : MonoBehaviour {
         OnReceiveEscapeEvent    -= HandleEscapePopupList;
         OnReceiveBackQuotaEvent -= HandleBackQuotaPopupList;
         OnReceiveEnterEvent     -= HandleSubmitPopupList;
-        popupListSelPos = 0;
+        popupListSelIndex = 0;
         popupListScrollPos = Vector2.zero;
     }
 
     void HandleDragExited() {
         Event currentEvent = Event.current;
-        var rect = new Rect(0, Screen.height, Screen.width, Screen.height);
         if(currentEvent.type == EventType.DragExited ) {
             if(DragAndDrop.objectReferences.Length == 1) {
                 GameObject dragObj = DragAndDrop.objectReferences[0] as GameObject;
@@ -515,7 +518,7 @@ public class JumpCommandGUI : MonoBehaviour {
 
         if(currentEvent.type == EventType.MouseDrag) {
             if(enableDragging) {
-                float delta = (mousePos - mousePosBeforeDrag).y/(Screen.height - uiItemHeight*2);
+                float delta = (mousePos - mousePosBeforeDrag).y/(Screen.height - popupListItemHeight*2);
                 verticalPos = Mathf.Clamp(verticalPosBeforeDrag + delta, 0, 1f) ;
             }
         }
@@ -525,8 +528,8 @@ public class JumpCommandGUI : MonoBehaviour {
             }
         }
         else if(currentEvent.type == EventType.MouseDown) {
-            float yPos = (Screen.height - uiItemHeight*2 )*verticalPos;
-            if( new Rect(0, yPos, Screen.width, uiItemHeight*2).Contains(mousePos)) {
+            float yPos = (Screen.height - popupListItemHeight*2 )*verticalPos;
+            if( new Rect(0, yPos, Screen.width, popupListItemHeight*2).Contains(mousePos)) {
                 mousePosBeforeDrag    = mousePos;
                 verticalPosBeforeDrag = verticalPos;
                 enableDragging = true;
@@ -544,28 +547,28 @@ public class JumpCommandGUI : MonoBehaviour {
         HandleDragExited();
         HandleMouseDrag();
 
-        float yPos = (Screen.height - uiItemHeight*2 )*verticalPos + shock;
+        float yPos = (Screen.height - popupListItemHeight * 2) * verticalPos + shockPixel;
         GUI.SetNextControlName("input");
-        EditorGUI.DropShadowLabel(new Rect(0, yPos, Screen.width, uiItemHeight), promptInfo, GUI.skin.label);
+        EditorGUI.DropShadowLabel(new Rect(0, yPos, Screen.width, popupListItemHeight), promptInfo, GUI.skin.label);
         String lastInput = input;
-        yPos += uiItemHeight;
-        input = GUI.TextField(new Rect(0, yPos, Screen.width, uiItemHeight), input);
-        yPos += uiItemHeight;
+        yPos += popupListItemHeight;
+        input = GUI.TextField(new Rect(0, yPos, Screen.width, popupListItemHeight), input);
+        yPos += popupListItemHeight;
 
         // draw popup list if open
-        if(isPopupListOpen) {
+        if(popupListOpen) {
             float scrollWidth= 16f;
 
-            float popupListHeight = popupListMaxDisplayItemNum * uiItemHeight;
-            float contentHeight = uiItemHeight * popupListContent.Length;
+            float popupListHeight = popupListMaxDisplayItemNum * popupListItemHeight;
+            float contentHeight = popupListItemHeight * popupListContent.Length;
 
             // make draw above screen if yPos is greater than half of screen height, if not popup list will draw out of screen.
-            if(yPos > Screen.height/2 + uiItemHeight) {
-                yPos = (Screen.height - uiItemHeight*2)*verticalPos - Mathf.Min(popupListHeight,contentHeight);
+            if(yPos > Screen.height/2 + popupListItemHeight) {
+                yPos = (Screen.height - popupListItemHeight*2)*verticalPos - Mathf.Min(popupListHeight,contentHeight);
             }
 
             popupListScrollPos = GUI.BeginScrollView(new Rect(0, yPos, Screen.width, popupListHeight), popupListScrollPos, new Rect(0,0,Screen.width-scrollWidth, contentHeight),false, false);
-                popupListSelPos = GUI.SelectionGrid(new Rect(0, 0, Screen.width, contentHeight), popupListSelPos, popupListContent, 1, style);
+            popupListSelIndex = GUI.SelectionGrid(new Rect(0, 0, Screen.width, contentHeight), popupListSelIndex, popupListContent, 1, popupListStyle);
             GUI.EndScrollView();        
         }
         
@@ -581,7 +584,7 @@ public class JumpCommandGUI : MonoBehaviour {
             input = "";
         }
 
-        if(input == "" && isPopupListOpen && pressBackspace) {
+        if(input == "" && popupListOpen && pressBackspace) {
             ClosePopupList();
         }
     }
@@ -616,12 +619,12 @@ public class JumpCommandGUI : MonoBehaviour {
     }
 
     // void OpenPopupListForGameObject() {
-    //     isPopupListOpen = true;
+    //     popupListOpen = true;
     //     popupListContent = GetAllGameObjectFullName(JumpCommand.Callee as GameObject);
     // }
 
     // void ClosePopupListForGameObject() {
-    //     isPopupListOpen = false;
+    //     popupListOpen = false;
     // }
 
     // string InputStatCurrentParameter {
