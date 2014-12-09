@@ -103,12 +103,17 @@ public class JumpCommandGUI : MonoBehaviour {
             JumpCommand.Execute(input);
             input = "";
         }
-        catch (Exception e){
-          Debug.LogError("Execute Failed" + e.ToString());
-          shock = 2;
-          Invoke("StopShock", 0.2f);
-          return;
+        catch (JumpCommandException e){
+            Debug.LogError("Execute Failed: " + e.Message);
         }
+        catch  {
+            throw;
+        }
+        finally {
+            shock = 2;
+            Invoke("StopShock", 0.2f);            
+        }
+
     }
 
     [JumpCommandRegister("ls", "List children of callee, if callee is null list all root game objects")]

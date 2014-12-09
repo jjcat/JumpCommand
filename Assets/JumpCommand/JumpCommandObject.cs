@@ -56,7 +56,7 @@ public class JumpCommandObject  {
         for (int i = 0; i < paramInfoLst.Length; ++i) {
             if(i >= paramStr.Length) { // if param string item number is less than param info item number, check defalut value from param info. 
                 if(paramInfoLst[i].RawDefaultValue == null) {
-                    throw new Exception(string.Format("Missing argument '#{0}' when call method {1}", i, Method.Name));
+                    throw new JumpCommandException(string.Format("Missing argument '#{0}' when call method {1}", i, Method.Name));
                 }
                 else {
                     paramLst[i] = paramInfoLst[i].RawDefaultValue;    
@@ -90,7 +90,7 @@ public class JumpCommandObject  {
             invokeResult = Method.Invoke(callee, paramLst);
         }
         else {
-            throw new Exception(string.Format("Need type of \"{0}\" instance object to execute", Type.Name));
+            throw new JumpCommandException(string.Format("Missing component \"{0}\" to execute command", Type.Name));
         }
 
         if(printResult ) {
@@ -112,7 +112,7 @@ public class JumpCommandObject  {
             float y = Convert.ToSingle(point[1]);
             return new Vector2(x, y);            
         } catch {
-            throw new Exception("Can not convert " + value + " to type Vector2");
+            throw new JumpCommandException("Can not convert arguments value " + value + " to type Vector2");
         }
         
     }
@@ -126,7 +126,7 @@ public class JumpCommandObject  {
             float z = Convert.ToSingle(point[2]);
             return new Vector3(x, y, z);
         } catch {
-            throw new Exception("Can not convert " +"\""+value+"\"" + " to type Vector3");      
+            throw new JumpCommandException("Can not convert arguments value " +"\""+value+"\"" + " to type Vector3");      
         }
     }
 
@@ -139,7 +139,7 @@ public class JumpCommandObject  {
             float z = Convert.ToSingle(point[2]);
             return new Color(x, y, z);
         } catch {
-            throw new Exception("Can not convert " +"\""+value+"\"" + " to type Color");      
+            throw new JumpCommandException("Can not convert arguments value " +"\""+value+"\"" + " to type Color");      
         }
     }
 

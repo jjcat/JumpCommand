@@ -6,6 +6,10 @@ using Object = System.Object;
 using Debug = UnityEngine.Debug;
 using System.ComponentModel;
 
+public class JumpCommandException : Exception {
+    public JumpCommandException(string msg) : base(msg) {}
+}
+
 
 static public class JumpCommand {
     static private  Dictionary<string, List<JumpCommandObject>> mCmdLst = new Dictionary<string, List<JumpCommandObject>>();
@@ -156,7 +160,9 @@ static public class JumpCommand {
         }
 
 
-        // check option
+        // check option flag
+        // -p: print return value
+        // -a: invoke all components
         int printOptionIndex = -1;
         int invokeAllComponentsIndex = -1;
         int i = 1;
@@ -211,6 +217,11 @@ static public class JumpCommand {
                             else if(Callee is GameObject) {
                                 go = Callee as GameObject;
                             }
+
+                            if(go == null) {
+                                throw new JumpCommandException("Missing game object to execute command");
+                            }
+
                             var component = go.GetComponent(cmd.Type);
                             cmd.Call(paramStr, component, printResult);                            
                         }
@@ -218,20 +229,24 @@ static public class JumpCommand {
                     else {
                         cmd.Call(paramStr, Callee, printResult);
                     }                    
-                } catch (Exception e){
+                } 
+                catch (JumpCommandException e) {
                     success  = false;
-                    exception = e;
+                    exception = e;                    
+                }
+                catch (Exception e) {
+                    throw;
                 }
                 if(success ) { 
                     break;                
                 }
             }
             if(!success) {
-                throw new Exception("Executed failed " + exception.ToString());
+                throw new JumpCommandException(exception.Message);
             }
         }
         else {
-            throw new Exception(string.Format("Can not find command \"{0}\"",argv[0]));
+            throw new JumpCommandException(string.Format("Can not find command \"{0}\"",argv[0]));
         }
     }
 
