@@ -573,16 +573,16 @@ public class JumpCommandGUI : MonoBehaviour {
         if(popupListOpen) {
             float scrollWidth= 16f;
 
-            float popupListHeight = popupListMaxDisplayItemNum * popupListItemHeight;
-            float contentHeight = popupListItemHeight * popupListContent.Length;
+            float popupListMaxHeight = popupListMaxDisplayItemNum * popupListItemHeight;
+            float popupListHeight = popupListItemHeight * popupListContent.Length;
 
             // make draw above screen if yPos is greater than half of screen height, if not popup list will draw out of screen.
-            if(yPos > Screen.height/2 + popupListItemHeight) {
-                yPos = (Screen.height - popupListItemHeight*2)*verticalPos - Mathf.Min(popupListHeight,contentHeight);
+            if(yPos + Mathf.Min(popupListMaxHeight,popupListHeight) > Screen.height) {
+                yPos = (Screen.height - popupListItemHeight*2)*verticalPos - Mathf.Min(popupListMaxHeight,popupListHeight);
             }
 
-            popupListScrollPos = GUI.BeginScrollView(new Rect(0, yPos, Screen.width, popupListHeight), popupListScrollPos, new Rect(0,0,Screen.width-scrollWidth, contentHeight),false, false);
-            popupListSelIndex = GUI.SelectionGrid(new Rect(0, 0, Screen.width, contentHeight), popupListSelIndex, popupListContent, 1, popupListStyle);
+            popupListScrollPos = GUI.BeginScrollView(new Rect(0, yPos, Screen.width, popupListMaxHeight), popupListScrollPos, new Rect(0,0,Screen.width-scrollWidth, popupListHeight),false, false);
+            popupListSelIndex = GUI.SelectionGrid(new Rect(0, 0, Screen.width, popupListHeight), popupListSelIndex, popupListContent, 1, popupListStyle);
             GUI.EndScrollView();        
         }
         
