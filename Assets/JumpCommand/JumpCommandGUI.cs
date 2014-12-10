@@ -90,7 +90,7 @@ public class JumpCommandGUI : MonoBehaviour {
 
     private void HandleSubmitPopupList() {
         TextEditor te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
-        input = popupListCommand[popupListSelIndex].Command;
+        input = popupListCommand[popupListSelIndex].Name;
         te.pos = input.Length;
         te.selectPos = te.pos;
         ClosePopupList();         
@@ -274,7 +274,7 @@ public class JumpCommandGUI : MonoBehaviour {
     {
         TextEditor te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
         if(KeyDown("tab") && popupListOpen) {
-            input = popupListCommand[popupListSelIndex].Command;
+            input = popupListCommand[popupListSelIndex].Name;
             te.pos = input.Length;
             te.selectPos = te.pos;
             ClosePopupList();
@@ -288,7 +288,7 @@ public class JumpCommandGUI : MonoBehaviour {
                 }
                 popupListCommand = autoCompletions;
                 popupListContent = content.ToArray();
-                input = popupListCommand[popupListSelIndex].Command;
+                input = popupListCommand[popupListSelIndex].Name;
                 te.pos = input.Length;
                 te.selectPos = te.pos;
                 OpenPopupList();
@@ -310,7 +310,7 @@ public class JumpCommandGUI : MonoBehaviour {
     }
 
     private string GetCommandRichText(JumpCommandObject command) {
-        return string.Format("<b>{0,-10}</b> <b><color=grey>{1}</color></b>   \"<i>{2}</i>\"", command.Command, command.ParametersInfo(), command.Help);
+        return string.Format("<b>{0,-10}</b> <b><color=grey>{1}</color></b>   \"<i>{2}</i>\"", command.Name, command.ParametersInfo(), command.Help);
     }
 
     private void ShouldOpemPopupList() {

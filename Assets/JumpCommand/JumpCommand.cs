@@ -12,13 +12,13 @@ public class JumpCommandException : Exception {
 }
 
 public class JumpCommandRegister : Attribute {
-    public string command;
+    public string commandName;
     public string help;
     public string gameObjFullName;
 
-    public JumpCommandRegister(string command, string help = "", string gameObjFullName = "") {
-        this.command     = command;
-        this.help        = help;
+    public JumpCommandRegister(string commandName, string help = "", string gameObjFullName = "") {
+        this.commandName     = commandName;
+        this.help            = help;
         this.gameObjFullName = gameObjFullName;
     }
 }
@@ -79,7 +79,6 @@ static public class JumpCommand {
         tw.Close();
     }
 
-
     static private void RegisterAllCommandObjects(Assembly assembly) {
         // find all type in assembly, if type's attributes contains JumpCommandRegister, then register the command.
         foreach( var t in assembly.GetTypes()) {
@@ -89,7 +88,7 @@ static public class JumpCommand {
             foreach(var m in t.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)) {  
                 foreach(var a in m.GetCustomAttributes(true)) {
                     if(a.GetType() == typeof(JumpCommandRegister)) {
-                        string commandName = (a as JumpCommandRegister).command;
+                        string commandName = (a as JumpCommandRegister).commandName;
                         string help        = (a as JumpCommandRegister).help;
                         string gameObject  = (a as JumpCommandRegister).gameObjFullName;
                         if(mCmdLst.ContainsKey(commandName)) {
@@ -327,7 +326,7 @@ static public class JumpCommand {
     static private void OutputAllCommnd(string command="") {
         foreach(var c in mCmdLst.Values) {
             foreach(var cmd in c) {
-                if(!cmd.Command.ToUpper().StartsWith(command.ToUpper())) continue;
+                if(!cmd.Name.ToUpper().StartsWith(command.ToUpper())) continue;
                 Debug.Log(cmd.ToString());                
             }
         }        

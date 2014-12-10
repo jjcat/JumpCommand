@@ -6,7 +6,7 @@ using Object = System.Object;
 
 
 public class JumpCommandObject  {
-    public string      Command     {get;private set;}
+    public string      Name     {get;private set;}
     public MethodInfo  Method      {get;private set;}
     public string      Help        {get;private set;}
     public string      GameObjFullName {get;private set;}
@@ -17,7 +17,7 @@ public class JumpCommandObject  {
     }
 
     public JumpCommandObject(string command, MethodInfo method, string help, string gameObject) {
-        Command     = command;
+        Name     = command;
         Method      = method;
         Help        = help;
         GameObjFullName = gameObject;
@@ -29,7 +29,7 @@ public class JumpCommandObject  {
         if(helpinfo != "") {
             helpinfo = "\"" + helpinfo + "\"";
         }
-        return string.Format("{0,-10} {1}   {2}", Command, parminfo, helpinfo);
+        return string.Format("{0,-10} {1}   {2}", Name, parminfo, helpinfo);
     }
 
     public string ParametersInfo() {
