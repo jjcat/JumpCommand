@@ -16,7 +16,7 @@ public class CubeFactory : MonoBehaviour {
 	
 	}
 
-    [JumpCommandRegister("create", "Create New Cube", "CubeFactory")]
+    [CommandItem("create", "Create New Cube", "CubeFactory")]
     GameObject Create(Vector3 birthPos ){
         var go = GameObject.Instantiate(CubePrefab, birthPos, Quaternion.identity) as GameObject;
         go.transform.parent = Parent;

@@ -11,12 +11,12 @@ public class JumpCommandException : Exception {
     public JumpCommandException(string msg) : base(msg) {}
 }
 
-public class JumpCommandRegister : Attribute {
+public class CommandItem : Attribute {
     public string commandName;
     public string help;
     public string gameObjFullName;
 
-    public JumpCommandRegister(string commandName, string help = "", string gameObjFullName = "") {
+    public CommandItem(string commandName, string help = "", string gameObjFullName = "") {
         this.commandName     = commandName;
         this.help            = help;
         this.gameObjFullName = gameObjFullName;
@@ -80,17 +80,17 @@ static public class JumpCommand {
     }
 
     static private void RegisterAllCommandObjects(Assembly assembly) {
-        // find all type in assembly, if type's attributes contains JumpCommandRegister, then register the command.
+        // find all type in assembly, if type's attributes contains Command, then register the command.
         foreach( var t in assembly.GetTypes()) {
             if(IsComponentType(t)) {
                 ComponentTypes.Add(t);
             }
             foreach(var m in t.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)) {  
                 foreach(var a in m.GetCustomAttributes(true)) {
-                    if(a.GetType() == typeof(JumpCommandRegister)) {
-                        string commandName = (a as JumpCommandRegister).commandName;
-                        string help        = (a as JumpCommandRegister).help;
-                        string gameObject  = (a as JumpCommandRegister).gameObjFullName;
+                    if(a.GetType() == typeof(CommandItem)) {
+                        string commandName = (a as CommandItem).commandName;
+                        string help        = (a as CommandItem).help;
+                        string gameObject  = (a as CommandItem).gameObjFullName;
                         if(mCmdLst.ContainsKey(commandName)) {
                             mCmdLst[commandName].Add(new JumpCommandObject(commandName, m, help, gameObject));                            
                             // Debug.LogError(string.Format("Can not register function {0} as command \"{1}\", \"{1}\" is already used by {2}.{3}", 
@@ -322,7 +322,7 @@ static public class JumpCommand {
         return result;            
     }
 
-    [JumpCommandRegister("help","list all the command")]
+    [CommandItem("help","list all the command")]
     static private void OutputAllCommnd(string command="") {
         foreach(var c in mCmdLst.Values) {
             foreach(var cmd in c) {

@@ -119,7 +119,7 @@ public class JumpCommandGUI : MonoBehaviour {
         }
     }
 
-    [JumpCommandRegister("ls", "List children of callee, if callee is null list all root game objects")]
+    [CommandItem("ls", "List children of callee, if callee is null list all root game objects")]
     static private void ListChildren() {
         if(JumpCommand.Callee is GameObject) {
             var go = JumpCommand.Callee as GameObject;
@@ -353,7 +353,7 @@ public class JumpCommandGUI : MonoBehaviour {
         }
     }
 
-    [JumpCommandRegister("cd", "Change game object")]
+    [CommandItem("cd", "Change game object")]
     static private void ChangeGameObjectCallee(string gameObjectPath = "") {
         if(gameObjectPath == "~" || gameObjectPath == "") {  // go to current selected game object
             JumpCommand.SetCallee(Selection.activeGameObject);
@@ -411,7 +411,7 @@ public class JumpCommandGUI : MonoBehaviour {
         }
     }
 
-    [JumpCommandRegister("sel", "Select callee in the Inspector")]
+    [CommandItem("sel", "Select callee in the Inspector")]
     static private void SelectCallee() {
         if(JumpCommand.Callee is GameObject) {
             Selection.activeGameObject = (JumpCommand.Callee as GameObject);

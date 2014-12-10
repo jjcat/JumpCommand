@@ -18,14 +18,14 @@ JumpCommand 能在 Unity 中输入命令行来进行函数调用。
 
 为函数注册一条命令，你需要
 
-1. 为函数添加 *JumpCommandRegister* 。
+1. 为函数添加 *CommandItem* 。
 2. 如果该函数是 *Monohehaviour* 的函数，你需要在调用该命令的时候在 Hierarchy 窗口中选择该 *GameObject* 。
 
 下面的例子为一个静态函数注册了一条命令 `test` 。
 
 
 ```csharp
-[JumpCommandRegister("test","output integer")]
+[CommandItem("test","output integer")]
 static public void CommandTest(int i) {
     Debug.Log(i.ToString());
 }
@@ -40,7 +40,7 @@ static public void CommandTest(int i) {
 //Person.cs
 public class Person :  MonoBehaviour {
     //...
-    [JumpCommandRegister("speed","Change person speed")]
+    [CommandItem("speed","Change person speed")]
     public void AdjustSpeed(float value) {
         speed += value;
     }
@@ -52,7 +52,7 @@ public class Person :  MonoBehaviour {
 
 JumpCommand 现在只能注册静态函数和从 *Monohehaviour* 继承的类的成员函数。如果函数的参数类型不是内置类型 (int, float, double, string, bool, enum) ，你将需要为该类型编写 Type Converter。
 
-如果调用的函数是静态函数，只需要添加 JumpCommandRegister 。如果该函数是 *Monobehaviour* 的函数，添加 *JumpCommandRegister* 并在调用命令的时候在Hierarchy选择该 *GameObject* 。
+如果调用的函数是静态函数，只需要添加 CommandItem 。如果该函数是 *Monobehaviour* 的函数，添加 *CommandItem* 并在调用命令的时候在Hierarchy选择该 *GameObject* 。
 
 ## 为自定义参数类型编写 Type Converter
 
