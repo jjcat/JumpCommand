@@ -23,15 +23,6 @@ public class JumpCommandObject  {
         GameObjFullName = gameObject;
     }
 
-    public string GetRichText() {
-        string parminfo = ParametersInfo();
-        string helpinfo = Help;
-        if(helpinfo != "") {
-            helpinfo = "\"" + helpinfo + "\"";
-        }
-        return string.Format("<b>{0,-10}</b> <color=grey>{1}</color>   <i>{2}</i>", Command, parminfo, helpinfo);        
-    }
-
     public override string ToString() {
         string parminfo = ParametersInfo();
         string helpinfo = Help;
@@ -41,7 +32,7 @@ public class JumpCommandObject  {
         return string.Format("{0,-10} {1}   {2}", Command, parminfo, helpinfo);
     }
 
-    private string ParametersInfo() {
+    public string ParametersInfo() {
         string result = "";
         var paramInfoLst = Method.GetParameters();
         for (int i = 0; i < paramInfoLst.Length-1; ++i) {

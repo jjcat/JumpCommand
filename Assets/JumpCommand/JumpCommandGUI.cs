@@ -22,6 +22,7 @@ public class JumpCommandGUI : MonoBehaviour {
     GUIStyle popupListStyle = new GUIStyle();  // popup list style
     bool     popupListOpen = false;
     string[] popupListContent;
+    List<JumpCommandObject> popupListCommand = new List<JumpCommandObject>();
     int      popupListSelIndex = 0;
     Vector2  popupListScrollPos = Vector2.zero;
     float    popupListItemHeight = 25f;
@@ -89,7 +90,7 @@ public class JumpCommandGUI : MonoBehaviour {
 
     private void HandleSubmitPopupList() {
         TextEditor te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
-        input = popupListContent[popupListSelIndex].Split(new char[1]{' '})[0];
+        input = popupListCommand[popupListSelIndex].Command;
         te.pos = input.Length;
         te.selectPos = te.pos;
         ClosePopupList();         
@@ -273,16 +274,21 @@ public class JumpCommandGUI : MonoBehaviour {
     {
         TextEditor te = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
         if(KeyDown("tab") && popupListOpen) {
-            input = popupListContent[popupListSelIndex].Split(new char[1]{' '})[0];
+            input = popupListCommand[popupListSelIndex].Command;
             te.pos = input.Length;
             te.selectPos = te.pos;
             ClosePopupList();
         }
         else if(KeyDown("tab") && !popupListOpen){
-            List<string> autoCompletions = JumpCommand.GetAutoCompletionCommands(input);
+            List<JumpCommandObject> autoCompletions = JumpCommand.GetAutoCompletionCommandObjects(input);
             if(autoCompletions.Count > 0 ) {
-                popupListContent = autoCompletions.ToArray();
-                input = popupListContent[popupListSelIndex].Split(new char[1]{' '})[0];
+                List<string> content = new List<string>();
+                foreach(var command in autoCompletions) {
+                    content.Add(GetCommandRichText(command));
+                }
+                popupListCommand = autoCompletions;
+                popupListContent = content.ToArray();
+                input = popupListCommand[popupListSelIndex].Command;
                 te.pos = input.Length;
                 te.selectPos = te.pos;
                 OpenPopupList();
@@ -303,11 +309,19 @@ public class JumpCommandGUI : MonoBehaviour {
         // }
     }
 
+    private string GetCommandRichText(JumpCommandObject command) {
+        return string.Format("<b>{0,-10}</b> <b><color=grey>{1}</color></b>   \"<i>{2}</i>\"", command.Command, command.ParametersInfo(), command.Help);
+    }
 
     private void ShouldOpemPopupList() {
-        List<string> autoCompletions = JumpCommand.GetAutoCompletionCommands(input);
-        if(autoCompletions.Count > 0 ) {
-            popupListContent = autoCompletions.ToArray();
+        List<JumpCommandObject> autoCompletions = JumpCommand.GetAutoCompletionCommandObjects(input);
+        if(autoCompletions.Count > 0 ) {            
+            List<string> content = new List<string>();
+            foreach(var command in autoCompletions) {
+                content.Add(GetCommandRichText(command));
+            }
+            popupListCommand = autoCompletions;
+            popupListContent = content.ToArray();
             if(!popupListOpen) {
                 OpenPopupList();
             }
