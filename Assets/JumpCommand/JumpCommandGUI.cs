@@ -58,7 +58,6 @@ public class JumpCommandGUI : MonoBehaviour {
         JumpCommand.Deinit();
     }
 
-
     void CreatePopupListStyle() {
         popupListStyle.alignment = TextAnchor.MiddleLeft;
         popupListStyle.normal.textColor = Color.white;
@@ -310,7 +309,7 @@ public class JumpCommandGUI : MonoBehaviour {
     }
 
     private string GetCommandRichText(JumpCommandObject command) {
-        return string.Format("<b>{0,-10}</b> <b><color=grey>{1}</color></b>   \"<i>{2}</i>\"", command.Name, command.ParametersInfo(), command.Help);
+        return string.Format("<b>{0,-10}</b> <b><color=grey>{1}</color></b>   \"<i>{2}</i>\"", command.Name, command.ParametersInfoString(), command.Help);
     }
 
     private void ShouldOpemPopupList() {
@@ -608,7 +607,6 @@ public class JumpCommandGUI : MonoBehaviour {
             return JumpCommand.ParseArguments(input).Length;
         }
     }
-
 
     string[] GetAllGameObjectFullName(GameObject parent) {
         List<string> result = new List<string>();

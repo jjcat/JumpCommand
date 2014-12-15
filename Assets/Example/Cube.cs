@@ -3,9 +3,8 @@ using System.Collections;
 
 public class Cube : MonoBehaviour {
 
-    float spinSpeed = 0.1f;
+    float spinSpeed = 0.5f;
     bool  isSpin = false;
-
 
     [CommandItem("color", "change cube color")]
     Color ChangeColor(Color color) {
@@ -23,8 +22,7 @@ public class Cube : MonoBehaviour {
     Vector3 Move(Cube cube) {
         transform.position = cube.transform.position;
         return transform.position;
-    }   
-
+    }
 
     [CommandItem("spin", "begin spin")]
     void Spin() {
