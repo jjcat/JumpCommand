@@ -48,15 +48,20 @@ public class JumpCommandGUI : MonoBehaviour {
     public float  verticalPos   = 0f;
 
     // Use this for initialization
+
+#if UNITY_EDITOR
     void Awake () {
         JumpCommand.Init();
         JumpCommand.OnChangeCallee += HandleChangeCalleeEvent;
         CreatePopupListStyle();
     }
+#endif
 
+#if UNITY_EDITOR
     void OnDisable() {
         JumpCommand.Deinit();
     }
+#endif
 
     void CreatePopupListStyle() {
         popupListStyle.alignment = TextAnchor.MiddleLeft;
@@ -434,6 +439,7 @@ public class JumpCommandGUI : MonoBehaviour {
         JumpCommand.SetCallee(Selection.activeGameObject);
     }
 
+#if UNITY_EDITOR
     public void Update() {
         if (Input.GetKeyDown(KeyCode.BackQuote)) {
             if(!enable) {
@@ -447,14 +453,13 @@ public class JumpCommandGUI : MonoBehaviour {
         // shock GUI when execute failed
         shockPixel = 0 - shockPixel;
 
-#if UNITY_EDITOR
         // update selected game object as callee.
         if(Selection.activeGameObject != lastSelection) {
             lastSelection = Selection.activeGameObject;
             OnSelectionChangedAction();
         }
-#endif
     }
+#endif
 
     public void OnOpenConsoleAction() {   
         enable       = true;
